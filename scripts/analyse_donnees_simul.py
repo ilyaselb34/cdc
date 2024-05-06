@@ -3,6 +3,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from math import *
 import numpy as np
+import os
+import sys
 
 def lecture_fichier_csv( nom_fichier, delimitateur, encodage, nb_lignes_entete):
     try:
@@ -23,21 +25,16 @@ def lecture_fichier_csv( nom_fichier, delimitateur, encodage, nb_lignes_entete):
         return resultat
     except:
         return []
-    
-simul=lecture_fichier_csv("simulation.csv",";",'utf-8',0)
-df=pd.DataFrame(simul,columns=['date','charge'])
-jours=df[df['date'].dt.hour == 0]
+
+chemin_fichier = os.path.join('..', 'output', 'simulation.csv')
+simul=lecture_fichier_csv(chemin_fichier,";",'utf-8',0)
 def moyenne_charge_jour(simul):
-    sortie=[]
     df=pd.DataFrame(simul,columns=['date','charge'])
-    jours=df[df['date'].dt.hour == 0]
-    print(df[df['date'] == df['date'][0]]['charge'].mean())
-    for i in jours['date']:
-        moyenne_jour=df[df['date'] == i]['charge'].mean()
-        sortie.append([i,moyenne_jour])
-    return sortie
+    moyenne_jour = df.groupby('date')['charge'].mean()
+    return moyenne_jour
 res=moyenne_charge_jour(simul)
-print(res[:20])
-with open('analyse_simulation.csv', 'w', newline='', encoding='utf-8') as fichier_csv:
+print(res.head(5))
+chemin_fichier = os.path.join('..', 'output', 'analyse_simulation.csv')
+with open(chemin_fichier, 'w', newline='', encoding='utf-8') as fichier_csv:
         writer = csv.writer(fichier_csv, delimiter=';')
         writer.writerows(res)

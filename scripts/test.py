@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from math import *
 import numpy as np
+
 def lecture_fichier_csv( nom_fichier, delimitateur, encodage, nb_lignes_entete):
     try:
         fichier = open(nom_fichier,"r", encoding=encodage)
