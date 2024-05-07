@@ -1,23 +1,21 @@
 """
-Auteur : Ilyas El Boujadaini
+Author: Ilyas El Boujadaini
 
-Contenu : Création de données simulées(2 colonnes, une date et une valeur de charge prise aléatoirement dans un tableau) puis export au format csv
+Content: Generating simulated data (2 columns, one for date and one for randomly selected charge values from an array) and exporting it to a csv format
 """
 
-#on génère un fichier csv à l'aide de python pour créer des données simulées avec un pas de temps régulier
-
-#import des librairies nécessaires
-import os   #pour les chemins
-import sys #pour les chemins
+#import necessary libraries
+import os   #for paths
+import sys #for paths
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 path_repo = str(os.path.dirname(current_dir))
 
-import datetime as dt #pour les dates
-from random import * #pour les valeurs de charges aléatoires
-import csv #pour l'export
+import datetime as dt #for dates
+from random import * #for random charge values
+import csv #for exporting
 
 
 
@@ -48,4 +46,4 @@ def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime, time_s
 data=[1000,2000,4000,5000,6000]
 start_time = dt.datetime(2023,1,1)
 end_time = dt.datetime(2024,1,1)
-create_const_csv_data(start_time=start_time, end_time=end_time, time_step=10, data=data)
+create_const_csv_data(start_time=start_time, end_time=end_time, time_step=20, data=data)
