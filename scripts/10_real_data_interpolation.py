@@ -1,7 +1,7 @@
 """
 Author: Ilyas El Boujadaini
 
-Content: Correction of the time step for complete real data, for the first try we will use the Enedis_SGE_HDM_A0622AU5.csv file and we will correct the time step to be 30 minutes between each data point.
+Content: Interpolation of the time step for complete real data, for the first try we will use the Enedis_SGE_HDM_A0622AU5.csv file and we will correct the time step to be 30 minutes between each data point.
 """
 
 #import necessary libraries
@@ -28,13 +28,13 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     for _ in range(3):
         next(csv_reader)
     for line in csv_reader:
-        # Convertir la date en format datetime
+        # Convert the date in datetime format 
         date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
         if line[1] != '':
-            # Ajouter la nouvelle ligne au DataFrame
+            # Add a new line to the DataFrame
             data.loc[len(data)] = [date, int(line[1])]
         else:
-            # Si la puissance est vide, ajouter 0
+            # if the poweris empty, add 0
             data.loc[len(data)] = [date, 0]
 
 #creating a dataframe for easier calculations and adding the time step between each data point to the dataframe
