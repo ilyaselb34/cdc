@@ -61,7 +61,7 @@ def interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
 df=interpolation(data, 1439, 30)
 print(df)
 
-def data_correction(data: pd.DataFrame, wanted_step: int):
+def dataset_interpolation(data: pd.DataFrame, wanted_step: int):
     """Correct the time step for irregular real data.
 
     Args:
@@ -91,7 +91,7 @@ def data_correction(data: pd.DataFrame, wanted_step: int):
 
     return res
 
-data_corrected=data_correction(data, 60)
+data_corrected=dataset_interpolation(data, 60)
 time_step = (data_corrected['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
 data_corrected['time_step'] = [0]+time_step
 step_change=data_corrected[data_corrected['time_step'] != data_corrected['time_step'].shift()]
