@@ -18,7 +18,7 @@ from random import * #for random power values
 import csv #for exporting
 import pandas as pd #for dataframes
 
-# Import the "11_real_data_interpolation_irregular_step" module using importlib et specify the module's name as string because the file name starts with a number
+# Import the "11_real_data_interpolation_irregular_step" module using importlib and specify the module's name as string because the file name starts with a number
 import importlib
 rdi = importlib.import_module("11_real_data_interpolation_irregular_step")
 
@@ -41,30 +41,39 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
             # if the power is empty, add 0
             data.loc[len(data)] = [date, 0]
 
-def duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
-    """Duplicate multiple rows from the dataframe to fill a time step in case it is too large.
+def verif_dup(data: pd.DataFrame, ind_step:int, wanted_step:int):
+    """Verify if there is a similar date in the data with a wanted time step between them. Similar dates are dates that are 7 days
+    apart with a limit of 3 weeks
 
     Args:
-        data (pd.DataFrame): pandas DataFrame with the data to correct, columns are 'date' and 'power'.
-        ind_step (int): the index of the data point where the time step is too much important.
+        data (pd.DataFrame): pandas Dataframe with the data to check, columns are 'date' and 'power'.
+        ind_step (int): the index of the irregular step to check.
+        wanted_step (int): the wanted time step between each data point(in minutes).
     
     Returns:
-        res (pd.DataFrame): the corrected data, returning the power data from the same time interval one day earlier.
+        res (bool): True if the time step is too big, False otherwise.
     """
-
-    res=pd.DataFrame(columns=['date', 'power'])
-    date = data['date'][ind_step] - dt.timedelta(days=1)
-
-    i = data[data['date'] == date].index[0]
-    while data['date'][i].date() == date.date():
-        i -= 1
-        new_date = date - dt.timedelta(minute=wanted_step)
-        res.loc[len(res)] = [new_date, data['power'][ind_step]]
-
-    return res
-
+    date=data['date'][ind_step]
+    i=1
+    date_found=False
+    print('wesh',date )
+    while i<=3 and not date_found:
+        date_1 = date + dt.timedelta(days=7*i)
+        date_2 = date - dt.timedelta(days=7*i)
+        if date_1 in data['date'] :
+            date=date_1
+            date_found=True
+        elif date_2 in data['date']:
+            date=date_2
+            date_found=True
+        else:
+            print('No date found')
+        i+=1
+    return date_found
+        
+    
 def dataset_correction(data: pd.DataFrame, wanted_step: int):
-    """Correct the time step for irregular real data.
+    """Correct the time step for irregular real data. Time step that are superior to 4 hours (240 minutes) are not corrected yet.
 
     Args:
         data (pd.DataFrame): pandas Dataframe with the data to correct, columns are 'date' and 'power'.
@@ -84,7 +93,7 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
 
     res.loc[0] = [data['date'][0], data['power'][0]]
     for i in range(1,len(data)):
-        if data['time_step'][i]>wanted_step:
+        if data['time_step'][i]>wanted_step and data['time_step'][i]<240:
             res = pd.concat([res, rdi.interpolation(data, i, wanted_step)], ignore_index=True)
         else:
             res.loc[len(res)] = [data['date'][i], data['power'][i]]
@@ -92,12 +101,17 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     del data['time_step']
 
     return res
+
+data_corrected=dataset_correction(data, 60)
+print(verif_dup(data_corrected, 364, 30))
 #Creating a copy of the dataframe not to modify the original one and to find the irregular time steps
-time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data['time_step'] = [0]+time_step
-step_change=data[data['time_step'] != data['time_step'].shift()]
+time_step = (data_corrected['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
+data_corrected['time_step'] = [0]+time_step
+step_change=data_corrected[data_corrected['time_step'] != data_corrected['time_step'].shift()]
 print(step_change)
 
-data_corrected = dataset_correction(data, 60)
+
 exit_path = os.path.join('output',file_name + '_cleaned.csv')
-data_corrected.to_csv(exit_path, sep=',', index=False, header=True, encoding='utf-8')
+data_corrected.to_csv(exit_path, sep=';', index=False)
+
+print(data_corrected['date'][1443])

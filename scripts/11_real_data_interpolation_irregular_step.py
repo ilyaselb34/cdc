@@ -51,7 +51,6 @@ def interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
     res = pd.DataFrame(columns=['date', 'power'])
     time_step=(data['date'][ind_step] - data['date'][ind_step-1]).total_seconds() / 60
     x=time_step//wanted_step
-    print('coucou',x)
     pow_scale=(data['power'][ind_step] - data['power'][ind_step-1])/(int(x))
     for i in range(1,int(x)):
         res.loc[len(res)] = [data['date'][ind_step-1] + dt.timedelta(minutes=(wanted_step*i)), data['power'][ind_step-1]+pow_scale*(i)]
@@ -59,7 +58,7 @@ def interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
     return res
 
 df=interpolation(data, 1439, 30)
-print(df)
+
 
 def dataset_interpolation(data: pd.DataFrame, wanted_step: int):
     """Interpolate the time step for irregular real data.

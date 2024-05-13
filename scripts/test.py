@@ -1,16 +1,5 @@
 import pandas as pd
 
-# Créer un DataFrame a
-a = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-
-# Créer une copie de a
-b = a.copy()
-
-# Modifier b
-b['A'] = [7, 8, 9]
-
-# Afficher a et b
-print("DataFrame a:")
-print(a)
-print("\nDataFrame b:")
-print(b)
+# Exemple de DataFrames
+df1 = pd.DataFrame({'A': [1, 2, 3, 4, 5, 6], 'B': [7, 8, 9, 10, 11, 12]})
+df2 = pd.DataFrame({'A': [2, 3, 4], 'B': [8, 9, 10]})
