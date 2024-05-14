@@ -4,41 +4,45 @@ Author: Ilyas El Boujadaini
 Content: Interpolation of the time step for irregular real data.
 """
 
-#import necessary libraries
-import os   #for paths
-import sys  #for paths
+# Imports necessary libraries for paths
+import os
+import sys
 
+# Adds the path to the project root to the system path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 path_repo = str(os.path.dirname(current_dir))
 
-import datetime as dt #for dates
-from random import * #for random power values
-import csv #for exporting
-import pandas as pd #for dataframes
+# Necessary libraries for data analysis
+import datetime as dt
+import csv
+import pandas as pd
 
-# Import the "11_real_data_interpolation_irregular_step" module using importlib and specify the module's name as string because the file name starts with a number
+"""Import the '11_real_data_interpolation_irregular_step' module using importlib and specify the module's name as string because
+the file name starts with a number"""
 import importlib
 rdi = importlib.import_module("11_real_data_interpolation_irregular_step")
 
-data = pd.DataFrame(columns=['date', 'power'])
-
+# Initializes the path to the csv file, adapting it to the user's OS
 file_name = 'Enedis_SGE_HDM_A06GKIR0'
 entry_path = os.path.join('input', file_name + '.csv')
 
+# Empty dataframe to store the data
+data = pd.DataFrame(columns=['date', 'power'])
+
+# Read the csv file and store the data in the dataframe
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=";")
     for _ in range(3):
         next(csv_reader)
+    
+    # Store the data in the dataframe with the date as a datetime object and the power as an integer
     for line in csv_reader:
-        # to convert the date to datetime format
-        date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
+        date = dt.datetime.strptime(line[0].split('+')[0], "%Y-%m-%dT%H:%M:%S")
         if line[1] != '':
-            # Add the new line to the DataFrame
             data.loc[len(data)] = [date, int(line[1])]
         else:
-            # if the power is empty, add 0
             data.loc[len(data)] = [date, 0]
 
 def verif_dup(data: pd.DataFrame, ind_step:int, wanted_step:int):
@@ -53,22 +57,40 @@ def verif_dup(data: pd.DataFrame, ind_step:int, wanted_step:int):
     Returns:
         res (bool): True if the time step is too big, False otherwise.
     """
+
+    # We take the date of the irregular step and we look for a similar date in the data
     date=data['date'][ind_step]
     i=1
     date_found=False
-    print('wesh',date )
+
     while i<=3 and not date_found:
+
+        # Checks if the date is in the data within the 3 weeks limit
         date_1 = date + dt.timedelta(days=7*i)
         date_2 = date - dt.timedelta(days=7*i)
-        if date_1 in data['date'] :
+        include_1 = data['date'].isin([date_1]).any()
+        include_2 = data['date'].isin([date_2]).any()
+
+        # If the date is found, we store it in the variable date and put an end to the loop
+        if include_1 :
             date=date_1
             date_found=True
-        elif date_2 in data['date']:
+        elif include_2:
             date=date_2
             date_found=True
         else:
             print('No date found')
+        
         i+=1
+    
+    index=data[data['date'] == date].index[0]
+    print('index',index)
+    step=data['time_step'][index]
+    cumul_step=0
+    while cumul_step<step and index>=0:
+        cumul_step+=data['time_step'][index]
+        index-=1
+    
     return date_found
         
     
@@ -85,11 +107,9 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
 
     res=pd.DataFrame(columns=['date', 'power'])
 
-    #Creating a copy of the dataframe not to modify the original one and to find the irregular time steps
+    # Creating a copy of the dataframe not to modify the original one and to find the irregular time steps
     time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
     data['time_step'] = [0]+time_step
-    step_change=data[data['time_step'] != data['time_step'].shift()]
-
 
     res.loc[0] = [data['date'][0], data['power'][0]]
     for i in range(1,len(data)):
@@ -102,16 +122,16 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
 
     return res
 
+
 data_corrected=dataset_correction(data, 60)
 print(verif_dup(data_corrected, 364, 30))
-#Creating a copy of the dataframe not to modify the original one and to find the irregular time steps
+
+# Verifies if the time step is corrected
 time_step = (data_corrected['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
 data_corrected['time_step'] = [0]+time_step
 step_change=data_corrected[data_corrected['time_step'] != data_corrected['time_step'].shift()]
 print(step_change)
 
-
+# Saves the corrected data in a csv file
 exit_path = os.path.join('output',file_name + '_cleaned.csv')
 data_corrected.to_csv(exit_path, sep=';', index=False)
-
-print(data_corrected['date'][1443])
