@@ -28,7 +28,7 @@ data = pd.DataFrame(columns=['date', 'power'])
 
 # Reads the data from the csv file
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=",")
+    csv_reader = csv.reader(csv_file, delimiter=";")
 
     # Skips the first 3 lines of the file because their data are irrelevant to the analysis
     for _ in range(3):
@@ -42,7 +42,7 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
         else:
             data.loc[len(data)] = [date, 0]
 
-def interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
+def lin_interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
     """Data linear interpolation for irregular time step. Also interpolates whole days if the time step is too big,
     so we have to improve this functionnality later.
 
@@ -68,9 +68,9 @@ def interpolation(data: pd.DataFrame, ind_step:int, wanted_step: int):
 
     return res
 
-df=interpolation(data, 1439, 30)
+df=lin_interpolation(data, 1439, 30)
 
-def dataset_interpolation(data: pd.DataFrame, wanted_step: int):
+def dataset_lin_interpolation(data: pd.DataFrame, wanted_step: int):
     """Interpolate the time step for irregular real data.
 
     Args:
@@ -91,7 +91,7 @@ def dataset_interpolation(data: pd.DataFrame, wanted_step: int):
     res.loc[0] = [data['date'][0], data['power'][0]]
     for i in range(1,len(data)):
         if data['time_step'][i]>wanted_step:
-            res = pd.concat([res, interpolation(data, i, wanted_step)], ignore_index=True)
+            res = pd.concat([res, lin_interpolation(data, i, wanted_step)], ignore_index=True)
         else:
             res.loc[len(res)] = [data['date'][i], data['power'][i]]
 
@@ -100,7 +100,7 @@ def dataset_interpolation(data: pd.DataFrame, wanted_step: int):
     return res
 
 # Calls the function
-data_interpolated=dataset_interpolation(data, 60)
+data_interpolated=dataset_lin_interpolation(data, 60)
 
 # Verifies that the time step between each data point has been corrected
 time_step = (data_interpolated['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)

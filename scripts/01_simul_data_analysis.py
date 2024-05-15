@@ -19,7 +19,7 @@ import pandas as pd
 import datetime as dt
 
 # Initializes the path to the csv file, adapting it to the user's OS
-entry_path = os.path.join('..', 'output', '00_simulation_20min_const.csv') 
+entry_path = os.path.join('output', '00_simulation_20min_const.csv') 
 simul=[]
 
 # Reads the csv file and converts the date to datetime format and the power to integer
@@ -51,5 +51,5 @@ res=average_daily_power(simul)
 print(res.head(5))
 
 # Exports the result to a csv file
-exit_path = os.path.join('..', 'output', '01_simulation_analysis.csv')
+exit_path = os.path.join('output', '01_simulation_analysis.csv')
 res.to_csv(exit_path, sep=';', index=False, header=False, encoding='utf-8')

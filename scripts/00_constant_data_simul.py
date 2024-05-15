@@ -19,8 +19,6 @@ import datetime as dt
 from random import *
 import csv
 
-
-
 def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime, time_step: int, data: list):
     """Generates a csv file with a constant time step(in minutes) for a year with random power values
 
@@ -45,7 +43,7 @@ def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime, time_s
         time += dt.timedelta(minutes=time_step)
 
     # Exports the data to a csv file
-    output_path = os.path.join('..', 'output', '00_simulation_' + str(time_step) +'min_const.csv')
+    output_path = os.path.join('output', '00_simulation_' + str(time_step) +'min_const.csv')
     with open(output_path, 'w', newline='', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file, delimiter=';')
         writer.writerows(simul)
