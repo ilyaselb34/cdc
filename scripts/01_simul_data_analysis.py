@@ -19,16 +19,18 @@ import pandas as pd
 import datetime as dt
 
 # Initializes the path to the csv file, adapting it to the user's OS
-entry_path = os.path.join('output', '00_simulation_20min_const.csv') 
-simul=[]
+entry_path = os.path.join('output', '00_simulation_20min_const.csv')
+simul = []
 
-# Reads the csv file and converts the date to datetime format and the power to integer
+"""Reads the csv file and converts the date to datetime format and the power to
+integer"""
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=";")
     for line in csv_reader:
-            line[0]=dt.datetime.strptime(line[0], '%Y-%m-%d %H:%M:%S')
-            line[1]=int(line[1])
-            simul.append(line)
+        line[0] = dt.datetime.strptime(line[0], '%Y-%m-%d %H:%M:%S')
+        line[1] = int(line[1])
+        simul.append(line)
+
 
 def average_daily_power(simul):
     """Calculates the average power per day from a list of simulated data
@@ -40,14 +42,21 @@ def average_daily_power(simul):
         daily_average (pd.Dataframe): dataframe with the average power per day
     """
 
-    # Formats the data into a pandas dataframe and calculates the average power per day
-    df=pd.DataFrame(simul,columns=['date','power'])
-    daily_average = df.groupby(df['date'].dt.date)['power'].mean().reset_index()
+    """Formats the data into a pandas dataframe and calculates the average
+    power per day"""
+    df = pd.DataFrame(simul, columns=['date', 'power'])
+    daily_average = (
+        df.groupby(df['date'].dt.date)
+        ['power']
+        .mean()
+        .reset_index()
+    )
 
     return daily_average
 
+
 # Calls the function and prints the first 5 rows of the result
-res=average_daily_power(simul)
+res = average_daily_power(simul)
 print(res.head(5))
 
 # Exports the result to a csv file
