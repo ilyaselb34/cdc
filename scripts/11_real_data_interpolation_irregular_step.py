@@ -30,13 +30,13 @@ data = pd.DataFrame(columns=['date', 'power', 'empirical'])
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=";")
 
-    """Skips the first 3 lines of the file because their data are irrelevant to
-    the analysis"""
+    # Skips the first 3 lines of the file because their data are irrelevant to
+    # the analysis
     for _ in range(3):
         next(csv_reader)
 
-    """Reads the data and converts the date to datetime format and the power to
-    integer"""
+    # Reads the data and converts the date to datetime format and the power to
+    # integer
     for line in csv_reader:
         date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
         if line[1] != '':
