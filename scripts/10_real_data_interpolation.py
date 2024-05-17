@@ -27,7 +27,7 @@ file_name = 'Enedis_SGE_HDM_A0622AU5'
 entry_path = os.path.join('input', file_name + '.csv')
 
 # Empty dataframe to store the data
-data = pd.DataFrame(columns=['date', 'power'])
+data = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
 # Reads the data from the csv file
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
@@ -43,9 +43,9 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     for line in csv_reader:
         date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
         if line[1] != '':
-            data.loc[len(data)] = [date, int(line[1])]
+            data.loc[len(data)] = [date, int(line[1]), 1]
         else:
-            data.loc[len(data)] = [date, 0]
+            data.loc[len(data)] = [date, 0, 1]
 
 """Adds a time step column to the dataframe, showing the time difference
 between each data point"""
@@ -55,7 +55,7 @@ print(data[data['time_step'] != data['time_step'].shift()])
 del data['time_step']
 
 # Creates a new dataframe to store the interpolated data
-data2 = pd.DataFrame(columns=['date', 'power'])
+data2 = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
 # Iterates through the rows of the DataFrame
 for i in range(len(data) - 1):
@@ -64,7 +64,7 @@ for i in range(len(data) - 1):
     if time_difference == 60:
         new_date = data['date'][i] + dt.timedelta(minutes=30)
         average_power = (data['power'][i] + data['power'][i + 1]) / 2
-        data2.loc[len(data2)] = [new_date, average_power]
+        data2.loc[len(data2)] = [new_date, average_power, 1]
 
 # Concatenates the two DataFrames and sorts the values by date
 data = pd.concat([data, data2], ignore_index=True)

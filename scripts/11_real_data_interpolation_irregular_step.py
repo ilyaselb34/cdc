@@ -24,7 +24,7 @@ file_name = 'Enedis_SGE_HDM_A06GKIR0'
 entry_path = os.path.join('input', file_name + '.csv')
 
 # Empty dataframe to store the data
-data = pd.DataFrame(columns=['date', 'power'])
+data = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
 # Reads the data from the csv file
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
@@ -40,9 +40,9 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     for line in csv_reader:
         date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
         if line[1] != '':
-            data.loc[len(data)] = [date, int(line[1])]
+            data.loc[len(data)] = [date, int(line[1]), 1]
         else:
-            data.loc[len(data)] = [date, 0]
+            data.loc[len(data)] = [date, 0, 1]
 
 
 def lin_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
@@ -62,7 +62,7 @@ def lin_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
     """
 
     # Creating a new dataframe to store the interpolated data
-    res = pd.DataFrame(columns=['date', 'power'])
+    res = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
     """Adds data points to the new dataframe, adapting the power value to the
     time step"""
@@ -73,8 +73,9 @@ def lin_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
     for i in range(1, int(x)):
         res.loc[len(res)] = [data['date'][ind_step-1]
                              + dt.timedelta(minutes=(wanted_step*i)),
-                             data['power'][ind_step-1]+pow_scale*(i)]
-    res.loc[len(res)] = [data['date'][ind_step], data['power'][ind_step]]
+                             data['power'][ind_step-1]+pow_scale*(i), 0]
+    res.loc[len(res)] = [data['date'][ind_step], data['power'][ind_step],
+                         data['empirical'][ind_step]]
 
     return res
 
@@ -95,7 +96,7 @@ def dataset_lin_interpolation(data: pd.DataFrame, wanted_step: int):
         res (pd.DataFrame): the corrected data.
     """
 
-    res = pd.DataFrame(columns=['date', 'power'])
+    res = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
     """Adds a new column to the dataframe with the time step between each data
     point"""
@@ -104,13 +105,14 @@ def dataset_lin_interpolation(data: pd.DataFrame, wanted_step: int):
 
     """Interpolates the data points with a time step bigger than the wanted
     time step"""
-    res.loc[0] = [data['date'][0], data['power'][0]]
+    res.loc[0] = [data['date'][0], data['power'][0], data['empirical'][0]]
     for i in range(1, len(data)):
         if data['time_step'][i] > wanted_step:
             res = pd.concat([res, lin_interpolation(data, i, wanted_step)],
                             ignore_index=True)
         else:
-            res.loc[len(res)] = [data['date'][i], data['power'][i]]
+            res.loc[len(res)] = [data['date'][i], data['power'][i],
+                                 data['empirical'][i]]
 
     del data['time_step']
 
@@ -124,6 +126,9 @@ data_interpolated = dataset_lin_interpolation(data, 60)
 time_step = (data_interpolated['date'].diff()
              / pd.Timedelta(minutes=1)).fillna(0)
 data_interpolated['time_step'] = [0]+time_step
+step_change = data_interpolated[data_interpolated['time_step']
+                                != data_interpolated['time_step'].shift()]
+print(step_change)
 
 # Saves the corrected data to a new csv file
 exit_path = os.path.join('output', file_name + '_cleaned.csv')
