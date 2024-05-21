@@ -6,18 +6,13 @@ Content: Linear interpolation of the time step for irregular real data.
 
 # Imports necessary libraries for paths
 import os
-import sys
-
-# Adds the path to the project root to the system path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.append(project_root)
-path_repo = str(os.path.dirname(current_dir))
 
 # Necessary libraries for data analysis
 import datetime as dt
 import csv
 import pandas as pd
+
+import tools.linear_interpolation as itrp
 
 # Initializes the path to the csv file, adapting it to the user's OS
 file_name = 'Enedis_SGE_HDM_A06GKIR0'
@@ -45,82 +40,10 @@ with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
             data.loc[len(data)] = [date, 0, 1]
 
 
-def lin_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
-    """Data linear interpolation for irregular time step. Also interpolates
-    whole days if the time step is too big, so we have to improve this
-    functionnality later.
-
-    Args:
-        data (pd.DataFrame): pandas Dataframe with the data to interpolate,
-            columns are 'date' and 'power'.
-        ind_step (int): the index of the irregular step to correct.
-        wanted_step (int): the wanted time step between each data point
-            (in minutes).
-
-    Returns:
-        res (pd.DataFrame): the interpolated data.
-    """
-
-    # Creating a new dataframe to store the interpolated data
-    res = pd.DataFrame(columns=['date', 'power', 'empirical'])
-
-    """Adds data points to the new dataframe, adapting the power value to the
-    time step"""
-    time_step = (data['date'][ind_step]
-                 - data['date'][ind_step-1]).total_seconds() / 60
-    x = time_step//wanted_step
-    pow_scale = (data['power'][ind_step] - data['power'][ind_step-1])/(int(x))
-    for i in range(1, int(x)):
-        res.loc[len(res)] = [data['date'][ind_step-1]
-                             + dt.timedelta(minutes=(wanted_step*i)),
-                             data['power'][ind_step-1]+pow_scale*(i), 0]
-    res.loc[len(res)] = [data['date'][ind_step], data['power'][ind_step],
-                         data['empirical'][ind_step]]
-
-    return res
-
-
-df = lin_interpolation(data, 1439, 30)
-
-
-def dataset_lin_interpolation(data: pd.DataFrame, wanted_step: int):
-    """Interpolate the time step for irregular real data.
-
-    Args:
-        data (pd.DataFrame): pandas Dataframe with the data to interpolate,
-            columns are 'date' and 'power'.
-        wanted_step (int): the wanted time step between each data point
-            (in minutes).
-
-    Returns:
-        res (pd.DataFrame): the corrected data.
-    """
-
-    res = pd.DataFrame(columns=['date', 'power', 'empirical'])
-
-    """Adds a new column to the dataframe with the time step between each data
-    point"""
-    time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-    data['time_step'] = [0]+time_step
-
-    """Interpolates the data points with a time step bigger than the wanted
-    time step"""
-    res.loc[0] = [data['date'][0], data['power'][0], data['empirical'][0]]
-    for i in range(1, len(data)):
-        if data['time_step'][i] > wanted_step:
-            res = pd.concat([res, lin_interpolation(data, i, wanted_step)],
-                            ignore_index=True)
-        else:
-            res.loc[len(res)] = [data['date'][i], data['power'][i],
-                                 data['empirical'][i]]
-
-    del data['time_step']
-
-    return res
-
+df = itrp.linear_interpolation(data, 1439, 30)
 
 # Calls the function
-data_interpolated = dataset_lin_interpolation(data, 60)
+data_interpolated = itrp.dataset_linear_interpolation(data, 60)
 
 # Verifies that the time step between each data point has been corrected
 time_step = (data_interpolated['date'].diff()
