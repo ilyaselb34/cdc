@@ -7,29 +7,22 @@ file and we will correct the time step to be 30 minutes between each data
 point.
 """
 
-# Imports necessary libraries for paths
 import os
 import sys
-
-# Adds the path to the project root to the system path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.append(project_root)
-path_repo = str(os.path.dirname(current_dir))
-
-# Necessary libraries for data analysis
 import datetime as dt
 import pandas as pd
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+tools_dir = os.path.join(parent_dir, 'tools')
+sys.path.append(tools_dir)
+import delimiter as dlmt  # type: ignore
 
 # Initializes the path to the csv file, adapting it to the user's OS
 file_name = 'Enedis_SGE_HDM_A0622AU5'
 entry_path = os.path.join('input', file_name + '.csv')
+delimiter = dlmt.detect_delimiter(entry_path)
+data = pd.read_csv(entry_path, sep=delimiter, header=2)
 
-# Empty dataframe to store the data
-data = pd.DataFrame(columns=['date', 'power', 'empirical'])
-
-# Reads the data from the csv file
-data = pd.read_csv(entry_path, sep=';', header=2)
 data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
                               format="%Y-%m-%dT%H:%M:%S")
 del data['Horodate']

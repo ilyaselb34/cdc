@@ -22,6 +22,7 @@ def duplicable(data: pd.DataFrame, time: dt.datetime, wanted_step: int):
         res: boolean, True if the date is duplicable, False otherwise.
     """
     res = True
+    
     time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
     data['time_step'] = [0] + time_step
     i = data[data['date'] == time].index[0]

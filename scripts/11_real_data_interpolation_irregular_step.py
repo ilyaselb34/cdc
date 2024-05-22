@@ -11,12 +11,13 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 tools_dir = os.path.join(parent_dir, 'tools')
 sys.path.append(tools_dir)
 import linear_interpolation as itrp  # type: ignore
+import delimiter as dlmt  # type: ignore
 
 # Initializes the path to the csv file, adapting it to the user's OS
 file_name = 'Enedis_SGE_HDM_A06GKIR0'
 entry_path = os.path.join('input', file_name + '.csv')
-
-data = pd.read_csv(entry_path, sep=';', header=2)
+delimiter = dlmt.detect_delimiter(entry_path)
+data = pd.read_csv(entry_path, sep=delimiter, header=2)
 data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
                               format="%Y-%m-%dT%H:%M:%S")
 del data['Horodate']
