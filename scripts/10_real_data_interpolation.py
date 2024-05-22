@@ -19,7 +19,6 @@ path_repo = str(os.path.dirname(current_dir))
 
 # Necessary libraries for data analysis
 import datetime as dt
-import csv
 import pandas as pd
 
 # Initializes the path to the csv file, adapting it to the user's OS
@@ -30,27 +29,18 @@ entry_path = os.path.join('input', file_name + '.csv')
 data = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
 # Reads the data from the csv file
-with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=",")
-
-    """Skips the first 3 lines of the file because their data are irrelevant
-    to the analysis"""
-    for _ in range(3):
-        next(csv_reader)
-
-    """Reads the data and converts the date to datetime format and the power to
-    integer"""
-    for line in csv_reader:
-        date = dt.datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S%z")
-        if line[1] != '':
-            data.loc[len(data)] = [date, int(line[1]), 1]
-        else:
-            data.loc[len(data)] = [date, 0, 1]
+data = pd.read_csv(entry_path, sep=';', header=2)
+data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
+                              format="%Y-%m-%dT%H:%M:%S")
+del data['Horodate']
+data['puissance_w'] = data['Valeur']
+del data['Valeur']
+data['valeur_mesuree'] = 'Oui'
 
 """Adds a time step column to the dataframe, showing the time difference
 between each data point"""
 time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data['time_step'] = [0]+time_step
+data['time_step'] = [0] + time_step
 print(data[data['time_step'] != data['time_step'].shift()])
 del data['time_step']
 
@@ -59,8 +49,8 @@ data2 = pd.DataFrame(columns=['date', 'power', 'empirical'])
 
 # Iterates through the rows of the DataFrame
 for i in range(len(data) - 1):
-    time_difference = (data['date'][i + 1]
-                       - data['date'][i]).total_seconds() / 60
+    time_difference = (data['date'][i + 1] - data['date'][i]
+                       ).total_seconds() / 60
     if time_difference == 60:
         new_date = data['date'][i] + dt.timedelta(minutes=30)
         average_power = (data['power'][i] + data['power'][i + 1]) / 2
@@ -72,7 +62,7 @@ data = data.sort_values(by='date').reset_index(drop=True)
 
 # Adds the time step column again to verify the interpolation
 time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data['time_step'] = [0]+time_step
+data['time_step'] = [0] + time_step
 print(data['time_step'].value_counts())
 
 # Exports the data to a new csv file

@@ -1,20 +1,12 @@
 """
 Author: Ilyas El Boujadaini
 
-Content: Generating simulated data (2 columns, one for date and one for randomly selected power values from an array) and exporting it to a csv format
+Content: Generating simulated data (2 columns, one for date and one for
+randomly selected power values from an array) and exporting it to a csv format
 """
 
-# Imports necessary libraries for paths
+
 import os
-import sys
-
-# Adds the path to the project root to the system path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.append(project_root)
-path_repo = str(os.path.dirname(current_dir))
-
-# Necessary libraries to data generation and export
 import datetime as dt
 import random as rd
 import csv

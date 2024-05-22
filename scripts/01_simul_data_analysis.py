@@ -6,14 +6,6 @@ Content: Analysis of simulated data (calculation of average power per day)
 
 # Imports necessary libraries for paths
 import os
-import sys
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.append(project_root)
-path_repo = str(os.path.dirname(current_dir))
-
-# Necessary libraries for data analysis
 import csv
 import pandas as pd
 import datetime as dt

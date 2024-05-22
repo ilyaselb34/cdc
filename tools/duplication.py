@@ -82,9 +82,8 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         data['time_step'] = [0] + time_step
         j = data[data['date'] == sub_date].index[0] - 1
         cumul_step = 0
-        while (j > 0 and
-               cumul_step < data['time_step'][ind_step] - wanted_step and
-               date_found):
+        while (j > 0 and cumul_step < data['time_step'][ind_step]
+               - wanted_step and date_found):
             if data['time_step'][j] > wanted_step:
                 date_found = False
             else:

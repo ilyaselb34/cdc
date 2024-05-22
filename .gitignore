@@ -3,3 +3,4 @@
 __pycache__/
 *rdcis*
 *formatage*
+.flake8
