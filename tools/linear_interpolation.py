@@ -2,7 +2,7 @@
 Author: Ilyas El Boujadaini
 
 Content: Definition of the linear interpolation functions for
-irregular time steps.
+    irregular time steps.
 """
 
 import pandas as pd
@@ -25,11 +25,11 @@ def linear_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
         res (pd.DataFrame): the interpolated data.
     """
 
-    # Creating a new dataframe to store the interpolated data
+    # Create a new dataframe to store the interpolated data
     res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
 
-    """Adds data points to the new dataframe, adapting the power value
-    to the time step"""
+    # Add data points to the new dataframe, adapting the power value
+    # to the time step
     pas_temps = (data['date'][ind_step]
                  - data['date'][ind_step - 1]).total_seconds() / 60
     x = pas_temps // wanted_step
@@ -61,13 +61,13 @@ def dataset_linear_interpolation(data: pd.DataFrame, wanted_step: int):
 
     res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
 
-    """Adds a new column to the dataframe with the time step between each data
-    point"""
-    pas_temps = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-    data['pas_temps'] = [0] + pas_temps
+    # Add a new column to the dataframe with the time step between
+    # each data point
+    data['pas_temps'] = [0] + (data['date'].diff() / pd.Timedelta(minutes=1)
+                               ).fillna(0)
 
-    """Interpolates the data points with a time step bigger than the wanted
-    time step"""
+    # Interpolate the data points with a time step bigger
+    # than the wanted time step
     res.loc[0] = [data['date'][0], data['puissance_w'][0],
                   data['valeur_mesuree'][0]]
     for i in range(1, len(data)):

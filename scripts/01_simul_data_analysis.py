@@ -14,8 +14,8 @@ import datetime as dt
 entry_path = os.path.join('output', '00_simulation_20min_const.csv')
 simul = []
 
-"""Reads the csv file and converts the date to datetime format and the power to
-integer"""
+# Reads the csv file and converts the date to datetime format and
+# the power to integer
 with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=";")
     for line in csv_reader:

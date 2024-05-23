@@ -24,14 +24,14 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     """
 
     res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
-    pas_temps = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-    data['pas_temps'] = [0] + pas_temps
+    data['pas_temps'] = [0] + (data['date'].diff() / pd.Timedelta(minutes=1)
+                               ).fillna(0)
 
     # Copy the data to avoid modifying the original DataFrame in case it needs
     # to be studied
     df = data.copy()
 
-    # Round the minutes to the nearest hour
+    # Round the minutes to the nearest hour and do the hourly mean of the data
     df.loc[df['pas_temps'] < 60, 'date'] = df.loc[
         df['pas_temps'] < 60, 'date'].apply(lambda x: x.replace(minute=0))
     df = df.groupby('date')['puissance_w'].mean().reset_index()

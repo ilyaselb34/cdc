@@ -31,9 +31,8 @@ df = itrp.linear_interpolation(data, 1439, 30)
 data_interpolated = itrp.dataset_linear_interpolation(data, 60)
 
 # Verifies that the time step between each data point has been corrected
-pas_temps = (data_interpolated['date'].diff() / pd.Timedelta(
-    minutes=1)).fillna(0)
-data_interpolated['pas_temps'] = [0] + pas_temps
+data_interpolated['pas_temps'] = [0] + (data_interpolated['date'].diff()
+                                        / pd.Timedelta(minutes=1)).fillna(0)
 step_change = data_interpolated[data_interpolated[
     'pas_temps'] != data_interpolated['pas_temps'].shift()]
 print(step_change)

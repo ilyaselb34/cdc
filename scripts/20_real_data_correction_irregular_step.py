@@ -32,8 +32,8 @@ data['valeur_mesuree'] = 'Oui'
 # export the final result in a csv file
 
 data_corrected = crct.dataset_correction(data, 60)
-pas_temps = (data_corrected['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data_corrected['pas_temps'] = [0] + pas_temps
+data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
+                                     / pd.Timedelta(minutes=1)).fillna(0)
 step_change = data_corrected[data_corrected['pas_temps'] != data_corrected[
     'pas_temps'].shift()]
 print(step_change)
