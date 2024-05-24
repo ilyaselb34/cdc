@@ -1,0 +1,12 @@
+---
+title: "Automatisation du traitement des courbes de charge"
+author: "Ilyas EL BOUJADAINI"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Ce projet s'articule en plusieurs phases
+
+- Phase 0 : Traitement de données simulées
+- Phase 1 : Traitement de données réelles par interpolation linéaire
+- phase 2 : Correction de données réelles avec adaptation de la méthode de traitement
