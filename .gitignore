@@ -4,3 +4,6 @@ __pycache__/
 *rdcis*
 *formatage*
 .flake8
+*info*
+*setup*d
+venv/

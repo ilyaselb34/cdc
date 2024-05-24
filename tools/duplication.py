@@ -106,3 +106,16 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         print('No substitution date found.')
         res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
     return res
+
+def data_duplication2(data: pd.DataFrame, ind_step: int, wanted_step: int):
+    """_summary_
+
+    Args:
+        data (pd.DataFrame): _description_
+        ind_step (int): _description_
+        wanted_step (int): _description_
+    """
+
+    res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
+    i = 1
+    
