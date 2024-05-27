@@ -6,22 +6,24 @@ Content: Analysis of simulated data (calculation of average power per day)
 
 # Imports necessary libraries for paths
 import os
-import csv
 import pandas as pd
-import datetime as dt
+
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+tools_dir = os.path.join(parent_dir, 'tools')
+sys.path.append(tools_dir)
+import delimiter as dlmt  # type: ignore
 
 # Initializes the path to the csv file, adapting it to the user's OS
-entry_path = os.path.join('output', '00_simulation_20min_const.csv')
-simul = []
+entry_path = os.path.join('input', '00_simulation_20min_const.csv')
 
 # Reads the csv file and converts the date to datetime format and
 # the power to integer
-with open(entry_path, "r", newline='', encoding='utf-8') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=";")
-    for line in csv_reader:
-        line[0] = dt.datetime.strptime(line[0], '%Y-%m-%d %H:%M:%S')
-        line[1] = int(line[1])
-        simul.append(line)
+delimiter = dlmt.detect_delimiter(entry_path)
+simul = pd.read_csv(entry_path, sep=delimiter)
+simul['date'] = pd.to_datetime(simul['date'].str.split('+').str[0],
+                               format="%Y-%m-%d %H:%M:%S")
+print(simul.head(5))
 
 
 def average_daily_power(simul):
@@ -36,10 +38,10 @@ def average_daily_power(simul):
 
     """Formats the data into a pandas dataframe and calculates the average
     power per day"""
-    df = pd.DataFrame(simul, columns=['date', 'power'])
+    df = pd.DataFrame(simul, columns=['date', 'puissance_w'])
     daily_average = (
         df.groupby(df['date'].dt.date)
-        ['power']
+        ['puissance_w']
         .mean()
         .reset_index()
     )
