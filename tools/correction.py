@@ -61,7 +61,8 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     res2 = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
     for j in range(1, len(res)):
         if res['pas_temps'][j] >= 240:
-            res2 = pd.concat([res2, dpc.data_duplication(res, j, wanted_step)],
+            res2 = pd.concat([res2, dpc.data_duplication2(res, j, wanted_step)
+                              ],
                              ignore_index=True)
     res = pd.concat([res, res2], ignore_index=True)
     res = res.sort_values(by='date').reset_index(drop=True)

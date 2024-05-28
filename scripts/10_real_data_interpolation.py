@@ -30,12 +30,12 @@ data['puissance_w'] = data['Valeur']
 del data['Valeur']
 data['valeur_mesuree'] = 'Oui'
 
-"""Adds a time step column to the dataframe, showing the time difference
-between each data point"""
-time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data['time_step'] = [0] + time_step
-print(data[data['time_step'] != data['time_step'].shift()])
-del data['time_step']
+# Adds a time step column to the dataframe, showing the time difference
+# between each data point
+data['pas_temps'] = [0] + (data['date'].diff()
+                           / pd.Timedelta(minutes=1)).fillna(0)
+print(data[data['pas_temps'] != data['pas_temps'].shift()])
+del data['pas_temps']
 
 # Creates a new dataframe to store the interpolated data
 data2 = pd.DataFrame(columns=['date', 'power', 'empirical'])
@@ -54,9 +54,9 @@ data = pd.concat([data, data2], ignore_index=True)
 data = data.sort_values(by='date').reset_index(drop=True)
 
 # Adds the time step column again to verify the interpolation
-time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-data['time_step'] = [0] + time_step
-print(data['time_step'].value_counts())
+data['pas_temps'] = [0] + (data['date'].diff()
+                           / pd.Timedelta(minutes=1)).fillna(0)
+print(data['pas_temps'].value_counts())
 
 # Exports the data to a new csv file
 exit_path = os.path.join('output', file_name + '_cleaned.csv')

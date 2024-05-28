@@ -24,8 +24,8 @@ def duplicable(data: pd.DataFrame, time: dt.datetime, wanted_step: int):
     res = True
 
     # This column is created to study the time step between each data point
-    time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-    data['time_step'] = [0] + time_step
+    data['pas_temps'] = [0] + (data['date'].diff()
+                               / pd.Timedelta(minutes=1)).fillna(0)
     i = data[data['date'] == time].index[0]
     cumul_step = 0
 
@@ -33,10 +33,10 @@ def duplicable(data: pd.DataFrame, time: dt.datetime, wanted_step: int):
         # Iterate over the data points before the studied date
         # to check if the time step is regular
         while (i >= 0 and cumul_step < wanted_step and res):
-            if data['time_step'][i] > wanted_step:
+            if data['pas_temps'][i] > wanted_step:
                 res = False
             else:
-                cumul_step += data['time_step'][i]
+                cumul_step += data['pas_temps'][i]
                 i -= 1
             if i == 0:
                 res = False
@@ -85,27 +85,25 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         i += 1
 
     if date_found:
-        time_step = (data['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
-        data['time_step'] = [0] + time_step
+        data['pas_temps'] = [0] + (data['date'].diff()
+                                   / pd.Timedelta(minutes=1)).fillna(0)
         j = data[data['date'] == sub_date].index[0] - 1
         cumul_step = 0
         # Iterate over the data points before the substitution date
-        while (j > 0 and cumul_step < data['time_step'][ind_step]
-               - wanted_step and date_found):
-            if data['time_step'][j] > wanted_step:
-                date_found = False
-            else:
-                # Add the data points to the new dataframe
-                res.loc[len(res)] = [data['date'][j], data['puissance_w'][j],
-                                     'Non']
-                cumul_step += data['time_step'][j]
-                j -= 1
+        while (j > 0 and cumul_step < data['pas_temps'][ind_step]
+               - wanted_step):
+            # Add the data points to the new dataframe
+            res.loc[len(res)] = [data['date'][j], data['puissance_w'][j],
+                                 'Non']
+            cumul_step += data['pas_temps'][j]
+            j -= 1
         # Correct the new data points by adding or removing the number of weeks
         res['date'] = res['date'] + dt.timedelta(days=7 * weeks)
     else:
         print('No substitution date found.')
         res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
     return res
+
 
 def data_duplication2(data: pd.DataFrame, ind_step: int, wanted_step: int):
     """_summary_
@@ -117,5 +115,43 @@ def data_duplication2(data: pd.DataFrame, ind_step: int, wanted_step: int):
     """
 
     res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
+    dates_found = False
     i = 1
-    
+    while i <= 3 and not dates_found:
+        cond_1 = data['date'].isin([data['date'][ind_step]
+                                    + dt.timedelta(days=i * 7)]).any()
+        cond_2 = data['date'].isin([data['date'][ind_step]
+                                    - dt.timedelta(days=i * 7)]).any()
+
+        if (cond_1 and cond_2):
+            sub_date1 = data['date'][ind_step] + dt.timedelta(days=i * 7)
+            dsd1 = duplicable(data, sub_date1, wanted_step)
+            sub_date2 = data['date'][ind_step] - dt.timedelta(days=i * 7)
+            dsd2 = duplicable(data, sub_date2, wanted_step)
+            if dsd1 and dsd2:
+                dates_found = True
+                weeks = i
+                df1 = pd.DataFrame(columns=['date', 'puissance_w'])
+                df2 = pd.DataFrame(columns=['date', 'puissance_w'])
+        i += 1
+
+    if dates_found:
+        data['pas_temps'] = [0] + (data['date'].diff()
+                                   / pd.Timedelta(minutes=1)).fillna(0)
+        j = data[data['date'] == sub_date1].index[0] - 1
+        k = data[data['date'] == sub_date2].index[0] - 1
+        cumul_step = 0
+        while (j > 0 and k > 0 and cumul_step < data['pas_temps'][ind_step]
+               - wanted_step):
+            df1.loc[len(df1)] = [data['date'][j], data['puissance_w'][j]]
+            df2.loc[len(df2)] = [data['date'][k], data['puissance_w'][k]]
+            cumul_step += data['pas_temps'][j]
+            j -= 1
+            k -= 1
+        res['puissance_w'] = (df1['puissance_w'] + df2['puissance_w']) / 2
+        res['date'] = df1['date'] - dt.timedelta(days=7 * weeks)
+        res['valeur_mesuree'] = 'Non'
+    else:
+        print('No substitution date found.')
+        res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
+    return res

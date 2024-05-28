@@ -103,7 +103,7 @@ dataframes.
 
 ```{python}
 import sys
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
 tools_dir = os.path.join(parent_dir, 'tools')
 sys.path.append(tools_dir)
 import delimiter as dlmt

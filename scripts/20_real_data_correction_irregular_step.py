@@ -16,7 +16,7 @@ import delimiter as dlmt  # type: ignore
 
 
 # Initializes the path to the csv file, adapting it to the user's OS
-file_name = 'Enedis_SGE_HDM_A069HR27'
+file_name = 'Enedis_SGE_HDM_A06GKIR0'
 entry_path = os.path.join('input', file_name + '.csv')
 
 delimiter = dlmt.detect_delimiter(entry_path)
