@@ -4,8 +4,8 @@ import pandas as pd
 import argparse
 
 # Ajoutez les répertoires nécessaires au chemin système
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-tools_dir = os.path.join(parent_dir, 'tools')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+tools_dir = os.path.join(current_dir, 'tools')
 sys.path.append(tools_dir)
 
 # Importez vos modules

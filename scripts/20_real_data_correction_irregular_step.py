@@ -16,8 +16,8 @@ import delimiter as dlmt  # type: ignore
 
 
 # Initializes the path to the csv file, adapting it to the user's OS
-file_name = 'Enedis_SGE_HDM_A06GKIR0'
-entry_path = os.path.join('input', file_name + '.csv')
+file_name = 'Enedis_SGE_HDM_A06GKIR0.csv'
+entry_path = os.path.join('input', file_name)
 
 delimiter = dlmt.detect_delimiter(entry_path)
 data = pd.read_csv(entry_path, sep=delimiter, header=2)
@@ -37,5 +37,5 @@ data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
 step_change = data_corrected[data_corrected['pas_temps'] != data_corrected[
     'pas_temps'].shift()]
 print(step_change)
-exit_path = os.path.join('output', file_name + '_cleaned.csv')
+exit_path = os.path.join('output', file_name[:-4] + '_cleaned.csv')
 data_corrected.to_csv(exit_path, sep=',', index=False)
