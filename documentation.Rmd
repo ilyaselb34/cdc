@@ -121,3 +121,8 @@ simul['date'] = pd.to_datetime(simul['date'].str.split('+').str[0],
 print(simul.head(5))
 ```
 
+```{python}
+df=pd.read_csv('output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv',';')
+print(df.head(20))
+```
+

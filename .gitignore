@@ -6,4 +6,5 @@ __pycache__/
 .flake8
 *info*
 *setup*d
-venv/
+env/
+*ipynb*

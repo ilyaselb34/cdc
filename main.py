@@ -3,12 +3,9 @@ import sys
 import pandas as pd
 import argparse
 
-# Ajoutez les répertoires nécessaires au chemin système
 current_dir = os.path.dirname(os.path.abspath(__file__))
 tools_dir = os.path.join(current_dir, 'tools')
 sys.path.append(tools_dir)
-
-# Importez vos modules
 import correction as crct  # type: ignore
 import delimiter as dlmt  # type: ignore
 
@@ -38,12 +35,13 @@ def main(file_name: str, timestep: int):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process and clean '
+    parser = argparse.ArgumentParser(description='Process and clean'
                                      'a CSV file.')
-    parser.add_argument('--input_csv', "-i", type=str, help='nom ficher csv')
-    parser.add_argument('--timestep', '-t', type=int, help='pas temporel en '
-                        'minutes')
+    parser.add_argument('--input_csv', '-i', type=str, required=True,
+                        help='nom fichier csv')
+    parser.add_argument('--timestep', '-t', type=int, required=True,
+                        help='pas temporel en minutes')
 
     args = parser.parse_args()
 
-    main(args.file_name, args.timestep)
+    main(args.input_csv, args.timestep)

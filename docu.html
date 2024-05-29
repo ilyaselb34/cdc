@@ -370,7 +370,9 @@ des données et il devient compliqué de réaliser des rapports.</p>
 <p>Quand cela arrive il faut manipuler les données à la main sur un
 tableur, ce qui peut s’avérer fastidieux sachant que les données sont
 récoltées sur une année entière. C’est pourquoi il est nécessaire
-d’automatiser ce traitement</p>
+d’automatiser ce traitement.</p>
+<p>Pour ce faire, nous allons utiliser un environnement virtuel
+Python.</p>
 </div>
 <div id="clonage-du-dépôt-github" class="section level2">
 <h2>Clonage du dépôt GitHub</h2>
@@ -380,14 +382,29 @@ d’automatiser ce traitement</p>
 <li>Ouvrez l’invite de commande Windows PowerShell.</li>
 <li>Placez vous dans le dossier dans lequel vous souhaitez cloner le
 dépôt avec la commande suivante (vous pouvez copier l’adresse avec clic
-droit):</li>
+droit dans la barre d’adresse de l’explorateur de fichiers
+Windowss):</li>
 </ul>
-<pre class="bash"><code>cd adresse\absolue\du\dossier</code></pre>
+<pre class="bash"><code>cd chemin\absolu\du\dossier</code></pre>
 <ul>
 <li>Clonez le dépôt avec la commande:</li>
 </ul>
 <pre class="bash"><code>git clone https://github.com/ilyaselb34/cdc.git</code></pre>
-<p>Le dépot est maintenant cloné.</p>
+<p>Le dépôt est maintenant cloné.</p>
+</div>
+<div id="linux" class="section level3">
+<h3>Linux</h3>
+<ul>
+<li>Ouvrez un terminal:</li>
+<li>Placez-vous dans le dossier dans lequel vous souhaitez cloner le
+dépôt avec la commande suivante :</li>
+</ul>
+<pre class="bash"><code>cd /chemin/absolu/du/dossier</code></pre>
+<ul>
+<li>Clonez le dépôt avec la commande:</li>
+</ul>
+<pre class="bash"><code>git clone https://github.com/ilyaselb34/cdc.git</code></pre>
+<p>Le dépôt est maintenant cloné.</p>
 </div>
 </div>
 <div id="installation-de-lenvironnement-virtuel" class="section level2">
@@ -397,12 +414,12 @@ droit):</li>
 <ul>
 <li>Ouvrez l’invite de commande Windows PowerShell si vous l’avez
 fermée</li>
-<li>Placez vous dans le dossier dans lequel vous avez cloné le dépôt
-avec la commande suivante si vous n’y êtes pas déja.</li>
+<li>Placez vous dans le répertoire dans lequel vous avez cloné le dépôt
+avec la commande suivante si vous n’y êtes pas déjà.</li>
 </ul>
-<pre class="bash"><code>cd adresse\absolue\du\dossier</code></pre>
+<pre class="bash"><code>cd chemin\absolu\du\dossier</code></pre>
 <ul>
-<li>Placez vous dans le dossier cdc avec</li>
+<li>Placez vous dans le répertoire cdc avec</li>
 </ul>
 <pre class="bash"><code>cd cdc</code></pre>
 <ul>
@@ -432,13 +449,96 @@ la commande:</li>
 nécessaires avec la commande :</li>
 </ul>
 <pre class="bash"><code>pip install -r requirements.txt</code></pre>
+<ul>
+<li>Facultatif: vous pouvez consulter les modules installés dans
+l’environnement avec la commande :</li>
+</ul>
+<pre class="bash"><code>pip freeze</code></pre>
+<p>L’environnement est prêt à être utilisé.</p>
+</div>
+<div id="linux-1" class="section level3">
+<h3>Linux</h3>
+<ul>
+<li>Ouvrez un terminal si ce n’est pas déjà fait.</li>
+<li>Placez-vous dans le répertoire dans lequel vous avez cloné le dépôt
+avec la commande suivante si vous n’y êtes pas déjà.</li>
+</ul>
+<pre class="bash"><code>cd /chemin/absolu/du/dossier</code></pre>
+<ul>
+<li>Placez-vous dans le répertoire cdc avec</li>
+</ul>
+<pre class="bash"><code>cd cdc</code></pre>
+<ul>
+<li>Entrez la commande :</li>
+</ul>
+<pre class="bash"><code>python3 -m venv env</code></pre>
+<p>Cela crée l’environnement virtuel Python nommé ‘env’.</p>
+<ul>
+<li>Activez l’environnement avec la commande :</li>
+</ul>
+<pre class="bash"><code>source env/bin/activate</code></pre>
+<ul>
+<li>Maintenant que l’environnement est activé, installez les modules
+nécessaires avec la commande :</li>
+</ul>
+<pre class="bash"><code>pip install -r requirements.txt</code></pre>
+<ul>
+<li>Facultatif: vous pouvez consulter les modules installés dans
+l’environnement avec la commande :</li>
+</ul>
+<pre class="bash"><code>pip freeze</code></pre>
 <p>L’environnement est prêt à être utilisé.</p>
 </div>
 </div>
 <div id="utilisation" class="section level2">
 <h2>Utilisation</h2>
-<div id="exemple-de-base" class="section level3">
-<h3>Exemple de base</h3>
+<p>Supposons que vous ayez un fichier de courbes de charges à
+étudier/corriger, nommé courbes_2023.csv et que vous souhaitiez mettre
+ces données au pas de temps horaire (une mesure toutes les 60 min).</p>
+<p>Dans ce cas, vous appellerez le script main.py avec l’invite de
+commande de la manière suivante:</p>
+<div id="windows-2" class="section level3">
+<h3>Windows</h3>
+<ul>
+<li>Placez vous dans le répertoire cdc:</li>
+</ul>
+<pre class="bash"><code>cd adresse\absolue\du\dossier
+cd cdc</code></pre>
+<ul>
+<li>Si l’environnement n’est pas déjà activé, activez le:</li>
+</ul>
+<pre class="bash"><code>env\Scripts\Activate</code></pre>
+<ul>
+<li>Appelez maintenant le script main.py et utilisez les arguments
+–input_csv et –timestep:</li>
+</ul>
+<pre class="bash"><code>python main.py --input_csv courbes_2023.csv --timestep 60</code></pre>
+</div>
+<div id="linux-2" class="section level3">
+<h3>Linux</h3>
+<ul>
+<li>Placez vous dans le répertoire cdc:</li>
+</ul>
+<pre class="bash"><code>cd /chemin/absolu/du/dossier
+cd cdc</code></pre>
+<ul>
+<li>Si l’environnement n’est pas déjà activé, activez le:</li>
+</ul>
+<pre class="bash"><code>source env/bin/activate</code></pre>
+<ul>
+<li>Appelez maintenant le script main.py et utilisez les arguments
+–input_csv et –timestep:</li>
+</ul>
+<pre class="bash"><code>python main.py --input_csv courbes_2023.csv --timestep 60</code></pre>
+</div>
+<div id="résultats" class="section level3">
+<h3>Résultats</h3>
+<p>Le programme imprime alors un tableau à 2 lignes qui indique les
+lignes du CSV généré où le temps écoulé depuis la mesure précédente
+varie. Si le tableau ne contient que 2 lignes, c’est que le pas temporel
+est constant.</p>
+<p>Un tableau CSV nommé courbes_2023_cleaned.csv est alors exporté dans
+le sous répertoire output.</p>
 </div>
 </div>
 <div id="guide-de-développement" class="section level2">
