@@ -94,7 +94,7 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         cumul_step = 0
 
         # Iterate over the data points before the substitution date and
-        # increment the counter 
+        # increment the counter  
         while (j > 0 and cumul_step < data['pas_temps'][ind_step]
                - wanted_step):
             res.loc[len(res)] = [data['date'][j], data['puissance_w'][j],
