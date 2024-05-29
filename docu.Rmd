@@ -1,0 +1,79 @@
+---
+title: "Automatisation du traitement des courbes de charge électrique"
+author: "Ilyas EL BOUJADAINI"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+Les données fournies par SGE au format CSV possèdent parfois des irrégularités temporelles qui constituent un obstacle à une étude optimale de ces données et à l'obtention de résultats optimaux. En clair, il arrive que des données enregistrées de manière régulière (ex: toutes les 30 min) subissent une interruption de ce pas de temps (ex: le pas passe à 120min sur une certaine durée), il manque alors une partie des données et il devient compliqué de réaliser des rapports.
+
+Quand cela arrive il faut manipuler les données à la main sur un tableur, ce qui peut s'avérer fastidieux sachant que les données sont récoltées sur une année entière. C'est pourquoi il est nécessaire d'automatiser ce traitement
+
+## Clonage du dépôt GitHub
+### Windows :
+- Ouvrez l'invite de commande Windows PowerShell.
+- Placez vous dans le dossier dans lequel vous souhaitez cloner le dépôt avec la commande suivante (vous pouvez copier l'adresse avec clic droit):
+```{bash, eval=FALSE}
+cd adresse\absolue\du\dossier
+```
+- Clonez le dépôt avec la commande:
+```{bash, eval=FALSE}
+git clone https://github.com/ilyaselb34/cdc.git
+```
+Le dépot est maintenant cloné.
+
+## Installation de l'environnement virtuel
+
+### Windows :
+- Ouvrez l'invite de commande Windows PowerShell si vous l'avez fermée
+- Placez vous dans le dossier dans lequel vous avez cloné le dépôt avec la commande suivante si vous n'y êtes pas déja.
+```{bash, eval=FALSE}
+cd adresse\absolue\du\dossier
+```
+
+- Placez vous dans le dossier cdc avec
+```{bash, eval=FALSE}
+cd cdc
+```
+- Entrez la commande:
+```{bash, eval=FALSE}
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
+Cela permet d'accorder les autorisations nécessaires à la création d'un environnement virtuel uniquement à cette session PowerShell et évite les risques de sécurité futurs
+
+- Facultatif : Vous pouvez vérifier le statut de l'autorisation avec la commande:
+```{bash, eval=FALSE}
+Get-ExecutionPolicy
+```
+La console doit renvoyer "RemoteSigned"
+
+- Entrez la commande:
+```{bash, eval=FALSE}
+python -m venv env
+```
+Cela crée l'environnement virtuel python nommé 'env'
+
+- Activez l'environnement avec la commande:
+```{bash, eval=FALSE}
+env\Scripts\Activate
+```
+
+- Maintenant que l'environnement est activé, installez les modules nécessaires avec la commande :
+```{bash, eval=FALSE}
+pip install -r requirements.txt
+```
+L'environnement est prêt à être utilisé.
+
+## Utilisation
+### Exemple de base
+
+## Guide de développement
+### Structure du projet
+...
+
+## Contribution

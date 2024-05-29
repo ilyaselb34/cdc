@@ -11,9 +11,9 @@
 
 <meta name="author" content="Ilyas EL BOUJADAINI" />
 
-<meta name="date" content="2024-05-28" />
+<meta name="date" content="2024-05-29" />
 
-<title>Automatisation du traitement des courbes de charge</title>
+<title>Automatisation du traitement des courbes de charge électrique</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -351,123 +351,105 @@ display: none;
 
 
 <h1 class="title toc-ignore">Automatisation du traitement des courbes de
-charge</h1>
+charge électrique</h1>
 <h4 class="author">Ilyas EL BOUJADAINI</h4>
-<h4 class="date">2024-05-28</h4>
+<h4 class="date">2024-05-29</h4>
 
 </div>
 
 
-<p>Ce projet s’articule en plusieurs phases</p>
-<ul>
-<li>Phase 0 : Traitement de données simulées</li>
-<li>Phase 1 : Traitement de données réelles par interpolation
-linéaire</li>
-<li>Phase 2 : Correction de données réelles avec adaptation de la
-méthode de traitement</li>
-</ul>
-<div id="phase-0-données-simulées" class="section level2">
-<h2>Phase 0 : Données simulées</h2>
-<div id="constant_data_simul.py" class="section level3">
-<h3>00_constant_data_simul.py</h3>
-<p>Ce script simule des données de charge électrique avec un pas de
-temps régulier (choisi) entre deux dates (choisies).</p>
-<p>Pour cela on importe les modules Python nécessaires:</p>
-<pre class="python"><code>import os
-import datetime as dt
-import random as rd
-import pandas as pd</code></pre>
-<ul>
-<li>os : sert à créer un chemin d’exportation dans le répertoire du
-projet</li>
-<li>datetime : ce module formate les dates au format datetime,
-permettant de préciser chaque élément des dates (année, mois, jour,
-heure, …)</li>
-<li>random : permet de choisir aléatoirement des valeurs de puissance
-dans une liste de valeurs</li>
-<li>pandas : permet d’étudier des tableaux sous forme de dataframes,
-plus simples à manipuler et avec un temps d’exécution plus faible</li>
-</ul>
-<p>La génération de données repose sur la fonction
-create_const_csv_data() :</p>
-<pre class="python"><code>def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime,
-                          time_step: int, data: list):
-    simul = pd.DataFrame(columns=[&#39;date&#39;, &#39;puissance_w&#39;])
-    time = start_time
-
-    while time &lt; end_time:
-        line = [time, data[rd.randint(0, len(data) - 1)]]
-        simul.loc[len(simul)] = line
-        time += dt.timedelta(minutes=time_step)
-
-    output_path = os.path.join(&#39;input&#39;, &#39;00_simulation_&#39; + str(time_step)
-                               + &#39;min_const.csv&#39;)
-    simul.to_csv(output_path, sep=&#39;,&#39;, index=False, header=True,
-                 encoding=&#39;utf-8&#39;)</code></pre>
-<p>Cette fonction prend 4 arguments:</p>
-<ul>
-<li>start_time : la date de début au format datetime, antérieure à
-end_time</li>
-<li>end_time : la date de fin au format datetime, postérieure à
-start_time</li>
-<li>time_step : le pas temporel souhaité en minutes, entier</li>
-<li>data : liste qui contient les valeurs possibles de puissance en
-W</li>
-</ul>
-<p>Elle ne renvoie pas de résultat.</p>
-<p>En premier on crée le dataframe simul qui enregistrera les données à
-exporter, et la variable time qui prend la valeur de start_time, et qui
-servira d’indice à l’itération.</p>
-<p>Ensuite avec une boucle while qui prend comme condition que la date
-de fin <u>ne soit pas atteinte</u> (time &lt; end_time), on crée une
-liste nommée line de 2 éléments avec la variable time et une valeur de
-data choisie en réalisant un <u>tirage aléatoire parmi les indices de la
-liste</u> avec le module random (data[<u>rd.randint(0, len(data) -
-1)]</u>), on ajoute cette liste line à la liste simul
-(simul.loc[len(simul)] = line), et on ajoute à time <u>le pas temporel
-en minutes</u> (time += dt.timedelta(<u>minutes=time_step</u>))</p>
-<p>Une fois que la boucle finit ses itérations, on crée un chemin
-d’exportation pour le ficher CSV avec la variable output_path. On
-utilise la méthode os.path.join() pour adapter le chemin à l’OS de
-l’utilisateur. Comme le fichier exporté sera étudié par la suite, on
-exporte le résultat dans le sous-répertoire input, à la différence des
-autres scripts qui exportent tous dans output.</p>
-<p>Enfin, on exporte la liste simul au format CSV avec la bibliothèque
-pandas.</p>
-<p>Maintenant que la fonction est définie , on peut choisir une date de
-début, une date de fin et une liste de valeurs possibles.</p>
-<pre class="python"><code>data = [1000, 2000, 3000, 4000, 5000, 6000]
-start_time = dt.datetime(2023, 1, 1)
-end_time = dt.datetime(2024, 1, 1)
-
-create_const_csv_data(start_time=start_time, end_time=end_time, time_step=20,
-                      data=data)</code></pre>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Les données fournies par SGE au format CSV possèdent parfois des
+irrégularités temporelles qui constituent un obstacle à une étude
+optimale de ces données et à l’obtention de résultats optimaux. En
+clair, il arrive que des données enregistrées de manière régulière (ex:
+toutes les 30 min) subissent une interruption de ce pas de temps (ex: le
+pas passe à 120min sur une certaine durée), il manque alors une partie
+des données et il devient compliqué de réaliser des rapports.</p>
+<p>Quand cela arrive il faut manipuler les données à la main sur un
+tableur, ce qui peut s’avérer fastidieux sachant que les données sont
+récoltées sur une année entière. C’est pourquoi il est nécessaire
+d’automatiser ce traitement</p>
 </div>
-<div id="simul_data_analysis.py" class="section level3">
-<h3>01_simul_data_analysis.py</h3>
-<p>Ce script se sert des données générées dans le script
-00_constant_data_simul.py et génère un tableau des moyennes journalières
-de puissance sur la période étudiée</p>
-<pre class="python"><code>import os
-import pandas as pd</code></pre>
-<p>On importe d’abord les librairies os et pandas vues précédemment,
-pour les mêmes usages, c’est-à-dire adaptation à l’OS utilisateur,
-création de chemins et manipulation de dataframes.</p>
-<pre class="python"><code>import sys
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-tools_dir = os.path.join(parent_dir, &#39;tools&#39;)
-sys.path.append(tools_dir)
-import delimiter as dlmt</code></pre>
-<p>Ensuite, à l’aide du module sys, on importe le script delimiter.py
-qui détecte le séparateur du CSV étudié.</p>
-<pre class="python"><code>entry_path = os.path.join(&#39;input&#39;, &#39;00_simulation_20min_const.csv&#39;)
-
-delimiter = dlmt.detect_delimiter(entry_path)
-simul = pd.read_csv(entry_path, sep=delimiter)
-simul[&#39;date&#39;] = pd.to_datetime(simul[&#39;date&#39;].str.split(&#39;+&#39;).str[0],
-                               format=&quot;%Y-%m-%d %H:%M:%S&quot;)
-print(simul.head(5))</code></pre>
+<div id="clonage-du-dépôt-github" class="section level2">
+<h2>Clonage du dépôt GitHub</h2>
+<div id="windows" class="section level3">
+<h3>Windows :</h3>
+<ul>
+<li>Ouvrez l’invite de commande Windows PowerShell.</li>
+<li>Placez vous dans le dossier dans lequel vous souhaitez cloner le
+dépôt avec la commande suivante (vous pouvez copier l’adresse avec clic
+droit):</li>
+</ul>
+<pre class="bash"><code>cd adresse\absolue\du\dossier</code></pre>
+<ul>
+<li>Clonez le dépôt avec la commande:</li>
+</ul>
+<pre class="bash"><code>git clone https://github.com/ilyaselb34/cdc.git</code></pre>
+<p>Le dépot est maintenant cloné.</p>
 </div>
+</div>
+<div id="installation-de-lenvironnement-virtuel" class="section level2">
+<h2>Installation de l’environnement virtuel</h2>
+<div id="windows-1" class="section level3">
+<h3>Windows :</h3>
+<ul>
+<li>Ouvrez l’invite de commande Windows PowerShell si vous l’avez
+fermée</li>
+<li>Placez vous dans le dossier dans lequel vous avez cloné le dépôt
+avec la commande suivante si vous n’y êtes pas déja.</li>
+</ul>
+<pre class="bash"><code>cd adresse\absolue\du\dossier</code></pre>
+<ul>
+<li>Placez vous dans le dossier cdc avec</li>
+</ul>
+<pre class="bash"><code>cd cdc</code></pre>
+<ul>
+<li>Entrez la commande:</li>
+</ul>
+<pre class="bash"><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process</code></pre>
+<p>Cela permet d’accorder les autorisations nécessaires à la création
+d’un environnement virtuel uniquement à cette session PowerShell et
+évite les risques de sécurité futurs</p>
+<ul>
+<li>Facultatif : Vous pouvez vérifier le statut de l’autorisation avec
+la commande:</li>
+</ul>
+<pre class="bash"><code>Get-ExecutionPolicy</code></pre>
+<p>La console doit renvoyer “RemoteSigned”</p>
+<ul>
+<li>Entrez la commande:</li>
+</ul>
+<pre class="bash"><code>python -m venv env</code></pre>
+<p>Cela crée l’environnement virtuel python nommé ‘env’</p>
+<ul>
+<li>Activez l’environnement avec la commande:</li>
+</ul>
+<pre class="bash"><code>env\Scripts\Activate</code></pre>
+<ul>
+<li>Maintenant que l’environnement est activé, installez les modules
+nécessaires avec la commande :</li>
+</ul>
+<pre class="bash"><code>pip install -r requirements.txt</code></pre>
+<p>L’environnement est prêt à être utilisé.</p>
+</div>
+</div>
+<div id="utilisation" class="section level2">
+<h2>Utilisation</h2>
+<div id="exemple-de-base" class="section level3">
+<h3>Exemple de base</h3>
+</div>
+</div>
+<div id="guide-de-développement" class="section level2">
+<h2>Guide de développement</h2>
+<div id="structure-du-projet" class="section level3">
+<h3>Structure du projet</h3>
+<p>…</p>
+</div>
+</div>
+<div id="contribution" class="section level2">
+<h2>Contribution</h2>
 </div>
 
 

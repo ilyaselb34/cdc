@@ -14,7 +14,7 @@ import delimiter as dlmt  # type: ignore
 
 
 def main(file_name: str, timestep: int):
-    entry_path = os.path.join('input', file_name + '.csv')
+    entry_path = os.path.join('input', file_name)
     delimiter = dlmt.detect_delimiter(entry_path)
     data = pd.read_csv(entry_path, sep=delimiter, header=2)
     data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
@@ -33,16 +33,16 @@ def main(file_name: str, timestep: int):
     step_change = data_corrected[data_corrected['pas_temps']
                                  != data_corrected['pas_temps'].shift()]
     print(step_change)
-    exit_path = os.path.join('output', file_name + '_cleaned.csv')
+    exit_path = os.path.join('output', file_name[:-4] + '_cleaned' + '.csv')
     data_corrected.to_csv(exit_path, sep=',', index=False)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process and clean '
                                      'a CSV file.')
-    parser.add_argument('file_name', type=str, help='nom ficher csv sans '
-                        'extension')
-    parser.add_argument('timestep', type=int, help='pas temporel en minutes')
+    parser.add_argument('--input_csv', "-i", type=str, help='nom ficher csv')
+    parser.add_argument('--timestep', '-t', type=int, help='pas temporel en '
+                        'minutes')
 
     args = parser.parse_args()
 

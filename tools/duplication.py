@@ -69,6 +69,8 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         cond_2 = data['date'].isin([data['date'][ind_step]
                                     - dt.timedelta(days=i * 7)]).any()
 
+        # If one of the substitution dates is in the dataset, set a
+        # substitution date
         if (cond_1 or cond_2):
             sub_date1 = data['date'][ind_step] + dt.timedelta(days=i * 7)
             sub_date2 = data['date'][ind_step] - dt.timedelta(days=i * 7)
@@ -84,15 +86,17 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
                 sub_date = sub_date2
         i += 1
 
+    # If a substitution date is found, duplicate the data
     if date_found:
         data['pas_temps'] = [0] + (data['date'].diff()
                                    / pd.Timedelta(minutes=1)).fillna(0)
         j = data[data['date'] == sub_date].index[0] - 1
         cumul_step = 0
-        # Iterate over the data points before the substitution date
+
+        # Iterate over the data points before the substitution date and
+        # increment the counter 
         while (j > 0 and cumul_step < data['pas_temps'][ind_step]
                - wanted_step):
-            # Add the data points to the new dataframe
             res.loc[len(res)] = [data['date'][j], data['puissance_w'][j],
                                  'Non']
             cumul_step += data['pas_temps'][j]
