@@ -1,10 +1,14 @@
-*.csv*
-*test*
+# Python
 __pycache__/
-*rdcis*
-*formatage*
-.flake8
-*info*
-*setup*d
 env/
 *ipynb*
+
+# VS Code
+.flake8
+
+# Files
+*.csv*
+*test*
+*formatage*
+*info*
+*setup*d
