@@ -23,15 +23,22 @@ def main(file_name: str, timestep: int):
 
     # We call the main function, verify the time step between each
     # data point and export the final result in a csv file
+    print('Le fichier', file_name, 'contient des données mesurées entre les',
+          'dates suivantes', data['date'][0], 'et', data['date'][len(data)
+                                                                 - 1])
 
     data_corrected = crct.dataset_correction(data, timestep)
     data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
                                          / pd.Timedelta(minutes=1)).fillna(0)
     step_change = data_corrected[data_corrected['pas_temps']
                                  != data_corrected['pas_temps'].shift()]
-    print(step_change)
+    print('Le tableau suivant montre si il y a une variation du pas temporel')
+    print(step_change, '\n\n\n')
+    print('Voici les 20 premières lignes du résultat')
+    print(data_corrected.head(20), '\n\n\n')
     exit_path = os.path.join('output', file_name[:-4] + '_cleaned' + '.csv')
     data_corrected.to_csv(exit_path, sep=',', index=False)
+    print('Le fichier', file_name + '_cleaned.csv a été exporté dans output')
 
 
 if __name__ == '__main__':

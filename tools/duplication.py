@@ -104,7 +104,7 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         # Correct the new data points by adding or removing the number of weeks
         res['date'] = res['date'] + dt.timedelta(days=7 * weeks)
     else:
-        print('No substitution date found.')
+        print('Aucune date de substitution trouvée')
         res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
     return res
 
