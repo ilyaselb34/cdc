@@ -546,7 +546,119 @@ le sous répertoire output.</p>
 <h2>Guide de développement</h2>
 <div id="structure-du-projet" class="section level3">
 <h3>Structure du projet</h3>
-<p>…</p>
+<p>Ce projet s’articule en plusieurs phases</p>
+<ul>
+<li>Phase 0 : Traitement de données simulées</li>
+<li>Phase 1 : Traitement de données réelles par interpolation
+linéaire</li>
+<li>Phase 2 : Correction de données réelles avec adaptation de la
+méthode de traitement</li>
+</ul>
+</div>
+<div id="phase-0-données-simulées" class="section level3">
+<h3>Phase 0 : Données simulées</h3>
+<div id="constant_data_simul.py" class="section level4">
+<h4>00_constant_data_simul.py</h4>
+<p>Ce script simule des données de charge électrique avec un pas de
+temps régulier (choisi) entre deux dates (choisies).</p>
+<p>Pour cela on importe les modules Python nécessaires:</p>
+<pre class="python"><code>import os
+import datetime as dt
+import random as rd
+import pandas as pd</code></pre>
+<ul>
+<li>os : sert à créer un chemin d’exportation dans le répertoire du
+projet</li>
+<li>datetime : ce module formate les dates au format datetime,
+permettant de préciser chaque élément des dates (année, mois, jour,
+heure, …)</li>
+<li>random : permet de choisir aléatoirement des valeurs de puissance
+dans une liste de valeurs</li>
+<li>pandas : permet d’étudier des tableaux sous forme de dataframes,
+plus simples à manipuler et avec un temps d’exécution plus faible</li>
+</ul>
+<p>La génération de données repose sur la fonction
+create_const_csv_data() :</p>
+<pre class="python"><code>def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime,
+                          time_step: int, data: list):
+    simul = pd.DataFrame(columns=[&#39;date&#39;, &#39;puissance_w&#39;])
+    time = start_time
+
+    while time &lt; end_time:
+        line = [time, data[rd.randint(0, len(data) - 1)]]
+        simul.loc[len(simul)] = line
+        time += dt.timedelta(minutes=time_step)
+
+    output_path = os.path.join(&#39;input&#39;, &#39;00_simulation_&#39; + str(time_step)
+                               + &#39;min_const.csv&#39;)
+    simul.to_csv(output_path, sep=&#39;,&#39;, index=False, header=True,
+                 encoding=&#39;utf-8&#39;)</code></pre>
+<p>Cette fonction prend 4 arguments:</p>
+<ul>
+<li>start_time : la date de début au format datetime, antérieure à
+end_time</li>
+<li>end_time : la date de fin au format datetime, postérieure à
+start_time</li>
+<li>time_step : le pas temporel souhaité en minutes, entier</li>
+<li>data : liste qui contient les valeurs possibles de puissance en
+W</li>
+</ul>
+<p>Elle ne renvoie pas de résultat.</p>
+<p>En premier on crée le dataframe simul qui enregistrera les données à
+exporter, et la variable time qui prend la valeur de start_time, et qui
+servira d’indice à l’itération.</p>
+<p>Ensuite avec une boucle while qui prend comme condition que la date
+de fin <u>ne soit pas atteinte</u> (time &lt; end_time), on crée une
+liste nommée line de 2 éléments avec la variable time et une valeur de
+data choisie en réalisant un <u>tirage aléatoire parmi les indices de la
+liste</u> avec le module random (data[<u>rd.randint(0, len(data) -
+1)]</u>), on ajoute cette liste line à la liste simul
+(simul.loc[len(simul)] = line), et on ajoute à time <u>le pas temporel
+en minutes</u> (time += dt.timedelta(<u>minutes=time_step</u>))</p>
+<p>Une fois que la boucle finit ses itérations, on crée un chemin
+d’exportation pour le ficher CSV avec la variable output_path. On
+utilise la méthode os.path.join() pour adapter le chemin à l’OS de
+l’utilisateur. Comme le fichier exporté sera étudié par la suite, on
+exporte le résultat dans le sous-répertoire input, à la différence des
+autres scripts qui exportent tous dans output.</p>
+<p>Enfin, on exporte la liste simul au format CSV avec la bibliothèque
+pandas.</p>
+<p>Maintenant que la fonction est définie , on peut choisir une date de
+début, une date de fin et une liste de valeurs possibles.</p>
+<pre class="python"><code>data = [1000, 2000, 3000, 4000, 5000, 6000]
+start_time = dt.datetime(2023, 1, 1)
+end_time = dt.datetime(2024, 1, 1)
+
+create_const_csv_data(start_time=start_time, end_time=end_time, time_step=20,
+                      data=data)</code></pre>
+</div>
+<div id="simul_data_analysis.py" class="section level4">
+<h4>01_simul_data_analysis.py</h4>
+<p>Ce script se sert des données générées dans le script
+00_constant_data_simul.py et génère un tableau des moyennes journalières
+de puissance sur la période étudiée</p>
+<pre class="python"><code>import os
+import pandas as pd</code></pre>
+<p>On importe d’abord les librairies os et pandas vues précédemment,
+pour les mêmes usages, c’est-à-dire adaptation à l’OS utilisateur,
+création de chemins et manipulation de dataframes.</p>
+<pre class="python"><code>import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+tools_dir = os.path.join(parent_dir, &#39;tools&#39;)
+sys.path.append(tools_dir)
+import delimiter as dlmt</code></pre>
+<p>Ensuite, à l’aide du module sys, on importe le script delimiter.py
+qui détecte le séparateur du CSV étudié.</p>
+<pre class="python"><code>entry_path = os.path.join(&#39;input&#39;, &#39;00_simulation_20min_const.csv&#39;)
+
+delimiter = dlmt.detect_delimiter(entry_path)
+simul = pd.read_csv(entry_path, sep=delimiter)
+simul[&#39;date&#39;] = pd.to_datetime(simul[&#39;date&#39;].str.split(&#39;+&#39;).str[0],
+                               format=&quot;%Y-%m-%d %H:%M:%S&quot;)
+print(simul.head(5))</code></pre>
+<pre class="python"><code>df=pd.read_csv(&#39;output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv&#39;,&#39;;&#39;)
+print(df.head(20))</code></pre>
+</div>
 </div>
 </div>
 <div id="contribution" class="section level2">

@@ -1,15 +1,7 @@
 # Python
-__pycache__/
 env/
 .venv/
 *ipynb*
 
 # VS Code
 .flake8
-
-# Files
-*.csv*
-*test*
-*formatage*
-*info*
-*setup*d

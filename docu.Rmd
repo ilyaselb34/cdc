@@ -142,7 +142,7 @@ env\Scripts\Activate
 
 - Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
 ```{bash, eval=FALSE}
-python main.py --input_csv courbes_2023.csv --timestep 60
+python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
 ```
 
 ### Linux
@@ -159,7 +159,7 @@ source env/bin/activate
 
 - Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
 ```{bash, eval=FALSE}
-python main.py --input_csv courbes_2023.csv --timestep 60
+python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
 ```
 
 ### Résultats
@@ -285,7 +285,7 @@ simul['date'] = pd.to_datetime(simul['date'].str.split('+').str[0],
 print(simul.head(5))
 ```
 
-```{python}
+```{python, eval=FALSE}
 df=pd.read_csv('output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv',';')
 print(df.head(20))
 ```
