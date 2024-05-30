@@ -61,9 +61,11 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     res2 = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
     for j in range(1, len(res)):
         if res['pas_temps'][j] >= 240:
-            res2 = pd.concat([res2, dpc.data_duplication2(res, j, wanted_step)
-                              ],
-                             ignore_index=True)
+            dup = dpc.data_duplication2(res, j, wanted_step)
+            if not dup.empty and not dup.isna().all().all():
+                res2 = pd.concat([res2, dup], ignore_index=True)
+            else:
+                print("Skipping empty or all-NA DataFrame")
     res = pd.concat([res, res2], ignore_index=True)
     res = res.sort_values(by='date').reset_index(drop=True)
     del res['pas_temps']
