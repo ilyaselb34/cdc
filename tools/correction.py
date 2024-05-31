@@ -15,7 +15,7 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
 
     Args:
         df (pd.DataFrame): pandas DataFrame with the data to correct,
-            columns are 'date', 'puissance_w', 'valeur_mesuree'.
+            columns are 'date', 'puissance_w', 'type_valeur'.
         wanted_step (int): the wanted time step between each data point
             (in minutes).
 
@@ -23,7 +23,7 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
         res (pd.dfFrame): the corrected data.
     """
 
-    res = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
+    res = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])
     data['pas_temps'] = [0] + (data['date'].diff() / pd.Timedelta(minutes=1)
                                ).fillna(0)
 
@@ -35,13 +35,13 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     df.loc[df['pas_temps'] < 60, 'date'] = df.loc[
         df['pas_temps'] < 60, 'date'].apply(lambda x: x.replace(minute=0))
     df = df.groupby('date')['puissance_w'].mean().reset_index()
-    df['valeur_mesuree'] = 'Oui'
+    df['type_valeur'] = 'Moyennée'
 
     df['pas_temps'] = [0] + (df['date'].diff() / pd.Timedelta(minutes=1)
                              ).fillna(0)
 
     res.loc[0] = [df['date'][0], df['puissance_w'][0],
-                  df['valeur_mesuree'][0]]
+                  df['type_valeur'][0]]
     for i in range(1, len(df)):
         # At first, use linear interpolation for low time steps
         if df['pas_temps'][i] > wanted_step and df['pas_temps'][i] < 240:
@@ -50,7 +50,7 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
                             ignore_index=True)
         else:
             res.loc[len(res)] = [df['date'][i], df['puissance_w'][i],
-                                 df['valeur_mesuree'][i]]
+                                 df['type_valeur'][i]]
 
     res['pas_temps'] = [0] + (res['date'].diff() / pd.Timedelta(minutes=1)
                               ).fillna(0)
@@ -58,7 +58,7 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     # Use data duplication for time steps superior to 240 minutes
     # Also use a second res DataFrame to iterate through the first one
     # and concatenate them at the end
-    res2 = pd.DataFrame(columns=['date', 'puissance_w', 'valeur_mesuree'])
+    res2 = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])
     for j in range(1, len(res)):
         if res['pas_temps'][j] >= 240:
             dup = dpc.data_duplication2(res, j, wanted_step)
