@@ -29,8 +29,8 @@ def main(file_name: str, timestep: int):
     # We call the main function, verify the time step between each
     # data point and export the final result in a csv file
     print('Le fichier', file_name, 'contient des données mesurées entre les',
-          'dates suivantes', data['date'][0], 'et', data['date'][len(data)
-                                                                 - 1])
+          'dates suivantes :', data['date'][0], 'et', data['date'][len(data)
+                                                                   - 1])
 
     data_corrected = crct.dataset_correction(data, timestep)
     data_corrected['jour_semaine'] = data_corrected['date'].dt.strftime('%A')

@@ -99,7 +99,7 @@ def data_duplication(data: pd.DataFrame, ind_step: int, wanted_step: int):
         while (j > 0 and cumul_step < data['pas_temps'][ind_step]
                - wanted_step):
             res.loc[len(res)] = [data['date'][j], data['puissance_w'][j],
-                                 'Moyennée']
+                                 'Dupliquée']
             cumul_step += data['pas_temps'][j]
             j -= 1
 
@@ -177,7 +177,7 @@ def data_duplication2(data: pd.DataFrame, ind_step: int, wanted_step: int):
         # of power value
         res['puissance_w'] = (df1['puissance_w'] + df2['puissance_w']) / 2
         res['date'] = df1['date'] - dt.timedelta(days=7 * weeks)
-        res['type_valeur'] = 'Moyennée'
+        res['type_valeur'] = 'Dupliquée'
     else:
         print('No substitution date found.')
         res = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])

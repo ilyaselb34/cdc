@@ -7,6 +7,7 @@ Content: Definition of the data correction function.
 import pandas as pd
 import linear_interpolation as itrp
 import duplication as dpc
+import averaging_hour as avg
 
 
 def dataset_correction(data: pd.DataFrame, wanted_step: int):
@@ -29,24 +30,13 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
 
     # Copy the data to avoid modifying the original DataFrame in case it needs
     # to be studied
-    df = data.copy()
+    df = avg.averaging_low_step(data)
 
-    # Round the minutes to the nearest hour and do the hourly mean of the data
-    df.loc[df['pas_temps'] < 60, 'date'] = df.loc[
-        df['pas_temps'] < 60, 'date'].apply(lambda x: x.replace(minute=0))
-    df = df.groupby('date')['puissance_w'].mean().reset_index()
-    df['type_valeur'] = 'Moyennée'
-
-    df['pas_temps'] = [0] + (df['date'].diff() / pd.Timedelta(minutes=1)
-                             ).fillna(0)
-
-    res.loc[0] = [df['date'][0], df['puissance_w'][0],
-                  df['type_valeur'][0]]
     for i in range(1, len(df)):
         # At first, use linear interpolation for low time steps
         if df['pas_temps'][i] > wanted_step and df['pas_temps'][i] < 240:
-            res = pd.concat([res,
-                             itrp.linear_interpolation(df, i, wanted_step)],
+            res = pd.concat([res, itrp.linear_interpolation(df, i, wanted_step)
+                             ],
                             ignore_index=True)
         else:
             res.loc[len(res)] = [df['date'][i], df['puissance_w'][i],
