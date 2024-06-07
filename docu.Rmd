@@ -272,7 +272,7 @@ tools_dir = os.path.join(parent_dir, 'tools')
 sys.path.append(tools_dir)
 import delimiter as dlmt
 ```
-Ensuite, à l'aide du module sys, on importe le script delimiter.py qui détecte
+Ensuite, à l'aide du module sys, on importe le script `delimiter.py` qui détecte
 le séparateur du CSV étudié.
 
 ```{python, eval=FALSE}

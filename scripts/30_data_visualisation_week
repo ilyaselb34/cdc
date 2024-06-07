@@ -1,0 +1,57 @@
+import pandas as pd
+import locale
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Configuration locale pour les noms de jours en français
+locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+
+# Chemin du fichier
+file_name = r'output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv'
+
+# Chargement des données
+data = pd.read_csv(file_name, sep=',')
+data['date'] = pd.to_datetime(data['date'])
+data['puissance_w']  # Convertir la puissance en kWh
+
+# Décomposer la ligne suivante pour la rendre plus lisible
+# Original: data_week = data.groupby(data['date'].dt.date)['puissance_w'].sum().reset_index()
+
+# 1. Extraire les dates sans l'heure
+data['date_sans_heure'] = data['date'].dt.date
+
+# 2. Grouper les données par date sans l'heure
+grouped_data = data.groupby('date_sans_heure')
+
+# 3. Calculer la somme de 'puissance_w' pour chaque groupe
+somme_puissance_par_date = grouped_data['puissance_w'].sum()
+
+# 4. Réinitialiser l'index pour obtenir un DataFrame
+data_week = somme_puissance_par_date.reset_index()
+
+# Convertir 'date_sans_heure' en type datetime
+data_week['date'] = pd.to_datetime(data_week['date_sans_heure'])
+
+# Extraire le jour de la semaine en français
+data_week['jour_semaine'] = data_week['date'].dt.strftime('%A')
+data_week['energie_kwh'] = data_week['puissance_w'] / 1000
+del data_week['date_sans_heure']
+
+# Création du graphique avec les boxplots par jour de la semaine
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='jour_semaine', y='energie_kwh', data=data_week, showfliers=False, order=[
+    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'])
+sns.stripplot(x='jour_semaine', y='energie_kwh', data=data_week, color='black',
+              alpha=0.5, jitter=True, order=['lundi', 'mardi', 'mercredi',
+                                             'jeudi', 'vendredi', 'samedi',
+                                             'dimanche'])
+sns.pointplot(x='jour_semaine', y='energie_kwh', data=data_week, order=[
+    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'], 
+    estimator=np.mean, ci=None, color='red', markers='D', linestyles='')
+
+plt.xlabel('Jour de la semaine')
+plt.ylabel('Puissance (kWh)')
+plt.title('Boxplot de la consommation de puissance par jour de la semaine')
+plt.savefig('plots/A06GKIR0_daily_mean.png')
+plt.show()

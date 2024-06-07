@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ilyas EL BOUJADAINI" />
 
-<meta name="date" content="2024-05-30" />
+<meta name="date" content="2024-06-07" />
 
 <title>Automatisation du traitement des courbes de charge électrique</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">Automatisation du traitement des courbes de
 charge électrique</h1>
 <h4 class="author">Ilyas EL BOUJADAINI</h4>
-<h4 class="date">2024-05-30</h4>
+<h4 class="date">2024-06-07</h4>
 
 </div>
 
@@ -513,7 +513,7 @@ cd cdc</code></pre>
 <li>Appelez maintenant le script main.py et utilisez les arguments
 –input_csv et –timestep:</li>
 </ul>
-<pre class="bash"><code>python main.py --input_csv courbes_2023.csv --timestep 60</code></pre>
+<pre class="bash"><code>python clean_cdc.py --input_csv courbes_2023.csv --timestep 60</code></pre>
 </div>
 <div id="linux-2" class="section level3">
 <h3>Linux</h3>
@@ -530,7 +530,7 @@ cd cdc</code></pre>
 <li>Appelez maintenant le script main.py et utilisez les arguments
 –input_csv et –timestep:</li>
 </ul>
-<pre class="bash"><code>python main.py --input_csv courbes_2023.csv --timestep 60</code></pre>
+<pre class="bash"><code>python clean_cdc.py --input_csv courbes_2023.csv --timestep 60</code></pre>
 </div>
 <div id="résultats" class="section level3">
 <h3>Résultats</h3>
@@ -647,8 +647,8 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 tools_dir = os.path.join(parent_dir, &#39;tools&#39;)
 sys.path.append(tools_dir)
 import delimiter as dlmt</code></pre>
-<p>Ensuite, à l’aide du module sys, on importe le script delimiter.py
-qui détecte le séparateur du CSV étudié.</p>
+<p>Ensuite, à l’aide du module sys, on importe le script
+<code>delimiter.py</code> qui détecte le séparateur du CSV étudié.</p>
 <pre class="python"><code>entry_path = os.path.join(&#39;input&#39;, &#39;00_simulation_20min_const.csv&#39;)
 
 delimiter = dlmt.detect_delimiter(entry_path)

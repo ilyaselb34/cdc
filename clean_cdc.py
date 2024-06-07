@@ -5,6 +5,7 @@ import sys
 import pandas as pd
 import argparse
 import locale
+import re
 
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
@@ -16,15 +17,13 @@ import delimiter as dlmt  # type: ignore
 
 
 def main(file_name: str, timestep: int):
-    entry_path = os.path.join('input', file_name)
-    delimiter = dlmt.detect_delimiter(entry_path)
-    data = pd.read_csv(entry_path, sep=delimiter, header=2)
+    delimiter = dlmt.detect_delimiter(file_name)
+    data = pd.read_csv(file_name, sep=delimiter, header=2)
     data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
                                   format="%Y-%m-%dT%H:%M:%S")
     del data['Horodate']
     data['puissance_w'] = data['Valeur']
     del data['Valeur']
-    data['type_valeur'] = 'Mesurée'
 
     # We call the main function, verify the time step between each
     # data point and export the final result in a csv file
@@ -40,7 +39,12 @@ def main(file_name: str, timestep: int):
                                  != data_corrected['pas_temps'].shift()]
     print('Le tableau suivant montre si il y a une variation du pas temporel')
     print(step_change, '\n\n\n')
-    exit_path = os.path.join('output', file_name[:-4] + '_cleaned' + '.csv')
+
+    pattern = r'(Enedis.*?\.csv)'
+    match = re.search(pattern, file_name)
+    result = match.group(1)
+    exit_path = os.path.join('output', result[:-4] + '_cleaned.csv')
+
     data_corrected.to_csv(exit_path, sep=',', index=False)
     print('Le fichier', file_name + '_cleaned.csv a été exporté dans output')
 
