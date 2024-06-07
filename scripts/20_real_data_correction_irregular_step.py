@@ -19,7 +19,7 @@ import delimiter as dlmt  # type: ignore
 
 
 # Initializes the path to the csv file, adapting it to the user's OS
-file_name = 'Enedis_SGE_HDM_A06GKIR0.csv'
+file_name = 'Enedis_SGE_HDM_A0622A0E.csv'
 
 delimiter = dlmt.detect_delimiter('input/' + file_name)
 data = pd.read_csv('input/' + file_name, sep=delimiter, header=2)
