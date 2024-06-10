@@ -20,7 +20,7 @@ import file_name as fn  # type: ignore
 
 
 # Initializes the path to the csv file, adapting it to the user's OS
-file_name = r'C:\Users\ily_y\OneDrive\Bureau\L3 MIASHS\stage\cdc\input\Enedis_SGE_HDM_A06GKIR0.csv'
+file_name = r'input\Enedis_SGE_HDM_A06229H0.csv'
 
 delimiter = dlmt.detect_delimiter(file_name)
 data = pd.read_csv(file_name, sep=delimiter, header=2)
