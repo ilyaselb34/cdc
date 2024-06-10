@@ -4,54 +4,64 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-# Configuration locale pour les noms de jours en français
+# Set locale for day names in French
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
-# Chemin du fichier
+# File path
 file_name = r'output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv'
 
-# Chargement des données
+# Load data
 data = pd.read_csv(file_name, sep=',')
 data['date'] = pd.to_datetime(data['date'])
-data['puissance_w']  # Convertir la puissance en kWh
+data['puissance_w']  # Convert power to kWh
 
-# Décomposer la ligne suivante pour la rendre plus lisible
-# Original: data_week = data.groupby(data['date'].dt.date)['puissance_w'].sum().reset_index()
 
-# 1. Extraire les dates sans l'heure
+# Extract dates without time
 data['date_sans_heure'] = data['date'].dt.date
 
-# 2. Grouper les données par date sans l'heure
+# Group data by date without time
 grouped_data = data.groupby('date_sans_heure')
 
-# 3. Calculer la somme de 'puissance_w' pour chaque groupe
+# Calculate the sum of 'puissance_w' for each group
 somme_puissance_par_date = grouped_data['puissance_w'].sum()
 
-# 4. Réinitialiser l'index pour obtenir un DataFrame
+# Reset the index to get a DataFrame
 data_week = somme_puissance_par_date.reset_index()
 
-# Convertir 'date_sans_heure' en type datetime
+# Convert 'date_sans_heure' to datetime type
 data_week['date'] = pd.to_datetime(data_week['date_sans_heure'])
 
-# Extraire le jour de la semaine en français
+# Extract the day of the week in French
 data_week['jour_semaine'] = data_week['date'].dt.strftime('%A')
 data_week['energie_kwh'] = data_week['puissance_w'] / 1000
 del data_week['date_sans_heure']
+del data_week['puissance_w']
+print(data_week.head())
 
-# Création du graphique avec les boxplots par jour de la semaine
+# Create a plot with boxplots by day of the week
 plt.figure(figsize=(12, 6))
-sns.boxplot(x='jour_semaine', y='energie_kwh', data=data_week, showfliers=False, order=[
-    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'])
-sns.stripplot(x='jour_semaine', y='energie_kwh', data=data_week, color='black',
-              alpha=0.5, jitter=True, order=['lundi', 'mardi', 'mercredi',
-                                             'jeudi', 'vendredi', 'samedi',
-                                             'dimanche'])
-sns.pointplot(x='jour_semaine', y='energie_kwh', data=data_week, order=[
-    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'], 
-    estimator=np.mean, ci=None, color='red', markers='D', linestyles='')
+sns.boxplot(x='jour_semaine', y='energie_kwh', data=data_week,
+            showfliers=False, order=['lundi', 'mardi', 'mercredi',
+                                     'jeudi', 'vendredi', 'samedi',
+                                     'dimanche'], label='Boxplot')
+stripplot = sns.stripplot(x='jour_semaine', y='energie_kwh',
+                          data=data_week, color='black', alpha=0.5,
+                          jitter=True, order=['lundi', 'mardi', 'mercredi',
+                                              'jeudi', 'vendredi', 'samedi',
+                                              'dimanche'])
+sns.pointplot(x='jour_semaine', y='energie_kwh', data=data_week,
+              order=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi',
+                     'samedi', 'dimanche'], estimator=np.mean, errorbar=None,
+              color='red', markers='D', linestyles='', label='Moyenne')
 
+# Add a handle for individual points in the legend
+handles, labels = plt.gca().get_legend_handles_labels()
+handles.append(plt.Line2D([0], [0], marker='o', color='w',
+                          label='Données Individuelles',
+                          markerfacecolor='black', markersize=10))
+plt.legend(handles=handles)
 plt.xlabel('Jour de la semaine')
-plt.ylabel('Puissance (kWh)')
-plt.title('Boxplot de la consommation de puissance par jour de la semaine')
+plt.ylabel('Consommation Journalière (kWh)')
+plt.title('Consommation par jour de la semaine')
 plt.savefig('plots/A06GKIR0_daily_mean.png')
 plt.show()
