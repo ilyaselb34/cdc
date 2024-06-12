@@ -7,7 +7,7 @@ import seaborn as sns
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 # File path
-file_name = 'output/Enedis_SGE_HDM_A06229H0_cleaned.csv'
+file_name = 'output/Enedis_SGE_HDM_A06GKKU4_cleaned.csv'
 data = pd.read_csv(file_name, sep=',')
 data['date'] = pd.to_datetime(data['date'])
 
@@ -32,15 +32,19 @@ del data_month['puissance_w']
 
 # Ajouter une colonne couleur
 data_month['couleur'] = 'blue'
-data_month.loc[data_month['mois_annee'].str.contains('-03|-04|-05'), 'couleur'] = 'green'
-data_month.loc[data_month['mois_annee'].str.contains('-06|-07|-08'), 'couleur'] = 'yellow'
-data_month.loc[data_month['mois_annee'].str.contains('-09|-10|-11'), 'couleur'] = 'orange'
+data_month.loc[data_month['mois_annee'].str.contains('-03|-04|-05'), 'couleur'
+               ] = 'green'
+data_month.loc[data_month['mois_annee'].str.contains('-06|-07|-08'), 'couleur'
+               ] = 'yellow'
+data_month.loc[data_month['mois_annee'].str.contains('-09|-10|-11'), 'couleur'
+               ] = 'orange'
 
 print(data_month)
 
 # Create a bar chart
 plt.figure(figsize=(10, 6))
-sns.barplot(x='nom_mois', y='energie_kwh', data=data_month, palette=data_month['couleur'].tolist())
+sns.barplot(x='nom_mois', y='energie_kwh', data=data_month, palette=data_month[
+    'couleur'].tolist())
 plt.xlabel('Mois')
 plt.ylabel('Energie (kWh)')
 plt.title('Consommation d\'énergie par mois')
