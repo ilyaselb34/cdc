@@ -1,35 +1,326 @@
 # cdc
 
-## Installation
+## Introduction
 
-On commence par cloner le dépôt :
+Les données fournies par SGE au format CSV possèdent parfois des irrégularités temporelles qui constituent un obstacle à une étude optimale de ces données et à l'obtention de résultats optimaux. En clair, il arrive que des données enregistrées de manière régulière (ex: toutes les 30 min) subissent une interruption de ce pas de temps (ex: le pas passe à 120min sur une certaine durée), il manque alors une partie des données et il devient compliqué de réaliser des rapports.
 
-```shell
+Quand cela arrive il faut manipuler les données à la main sur un tableur, ce qui peut s'avérer fastidieux sachant que les données sont récoltées sur une année entière. C'est pourquoi il est nécessaire d'automatiser ce traitement.
+
+Pour ce faire, nous allons utiliser un environnement virtuel Python.
+
+## Clonage du dépôt GitHub
+
+### Clonage sous Windows
+
+- Ouvrez l'invite de commande Windows PowerShell.
+- Placez vous dans le dossier dans lequel vous souhaitez cloner le dépôt avec la commande suivante (vous pouvez copier l'adresse avec clic droit dans la barre d'adresse de l'explorateur de fichiers Windows):
+
+```bash
+cd chemin\absolu\du\dossier
+```
+
+- Clonez le dépôt avec la commande:
+
+```bash
 git clone https://github.com/ilyaselb34/cdc.git
 ```
 
-Puis on crée dans le répertoire l'environnement virtuel Python :
+Le dépôt est maintenant cloné.
 
-```shell
-python3 -m venv .venv
+### Clonage sous Linux
+
+- Ouvrez un terminal:
+- Placez-vous dans le dossier dans lequel vous souhaitez cloner le dépôt avec la commande suivante :
+
+```bash
+cd /chemin/absolu/du/dossier
 ```
 
-Cela va créer un répertoire `.venv/` dans le dépôt, que l'on va ignorer dans le `.gitignore` en y ajoutant une ligne `.venv/`. On active l'environnement virtuel `.venv` :
+- Clonez le dépôt avec la commande:
 
-```shell
-source .venv/bin/activate
+```bash
+git clone https://github.com/ilyaselb34/cdc.git
 ```
 
-Puis on y installe dans l'environnement les paquets nécessaires listés dans `requirements.txt` :
+Le dépôt est maintenant cloné.
 
-```shell
+## Installation de l'environnement virtuel
+
+### Installation sous Windows
+
+- Ouvrez l'invite de commande Windows PowerShell si vous l'avez fermée
+- Placez vous dans le répertoire dans lequel vous avez cloné le dépôt avec la commande suivante si vous n'y êtes pas déjà.
+
+```bash
+cd chemin\absolu\du\dossier
+```
+
+- Placez vous dans le répertoire cdc avec
+
+```bash
+cd cdc
+```
+
+- Entrez la commande:
+
+```bash
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
+
+Cela permet d'accorder les autorisations nécessaires à la création d'un environnement virtuel uniquement à cette session PowerShell et évite les risques de sécurité futurs
+
+- Facultatif : Vous pouvez vérifier le statut de l'autorisation avec la commande:
+
+```bash
+Get-ExecutionPolicy
+```
+
+La console doit renvoyer "RemoteSigned"
+
+- Entrez la commande:
+
+```bash
+python -m venv env
+```
+
+Cela crée l'environnement virtuel python nommé 'env'
+
+- Activez l'environnement avec la commande:
+
+```bash
+env\Scripts\Activate
+```
+
+- Maintenant que l'environnement est activé, installez les modules nécessaires avec la commande :
+
+```bash
 pip install -r requirements.txt
 ```
 
+- Facultatif: vous pouvez consulter les modules installés dans l'environnement avec la commande :
+
+```bash
+pip freeze
+```
+
+L'environnement est prêt à être utilisé.
+
+### Installation sous Linux
+
+- Ouvrez un terminal si ce n'est pas déjà fait.
+- Placez-vous dans le répertoire dans lequel vous avez cloné le dépôt avec la commande suivante si vous n'y êtes pas déjà.
+
+```bash
+cd /chemin/absolu/du/dossier
+```
+
+- Placez-vous dans le répertoire cdc avec
+
+```bash
+cd cdc
+```
+
+- Entrez la commande :
+
+```bash
+python3 -m venv env
+```
+
+Cela crée l'environnement virtuel Python nommé 'env'.
+
+- Activez l'environnement avec la commande :
+
+```bash
+source env/bin/activate
+```
+
+- Maintenant que l'environnement est activé, installez les modules nécessaires avec la commande :
+
+```bash
+pip install -r requirements.txt
+```
+
+- Facultatif: vous pouvez consulter les modules installés dans l'environnement avec la commande :
+
+```bash
+pip freeze
+```
+
+L'environnement est prêt à être utilisé.
+
 ## Utilisation
 
-Pour obtenir une CDC propre au pas temps horaire :
+Supposons que vous ayez un fichier de courbes de charges à étudier/corriger, nommé Enedis_SGE_HDM_A06GKIR0.csv et que vous souhaitiez mettre ces données au pas de temps horaire (une mesure toutes les 60 min).
 
-```shell
-./main.py --input_csv input/exemple_cdc.csv --timestep 60 --output_csv output/exemple_cdc_cleaned.csv
+Dans ce cas, vous appellerez le script main.py avec l'invite de commande de la manière suivante:
+
+### Utilisation sous Windows
+
+- Placez vous dans le répertoire cdc:
+
+```bash
+cd adresse\absolue\du\dossier
+cd cdc
 ```
+
+- Si l'environnement n'est pas déjà activé, activez le:
+
+```bash
+env\Scripts\Activate
+```
+
+- Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
+
+```bash
+python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
+```
+
+### Utilisation sous Linux
+
+- Placez vous dans le répertoire cdc:
+
+```bash
+cd /chemin/absolu/du/dossier
+cd cdc
+```
+
+- Si l'environnement n'est pas déjà activé, activez le:
+
+```bash
+source env/bin/activate
+```
+
+- Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
+
+```bash
+python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
+```
+
+### Résultats
+
+Le programme imprime alors un tableau à 2 lignes qui indique les lignes du CSV généré où le temps écoulé depuis la mesure précédente varie. Si le tableau ne contient que 2 lignes, c'est que le pas temporel est constant.
+
+Un tableau CSV nommé courbes_2023_cleaned.csv est alors exporté dans le sous répertoire output.
+
+## Guide de développement
+
+### Structure du projet
+
+Ce projet s'articule en plusieurs phases
+
+- Phase 0 : Traitement de données simulées
+- Phase 1 : Traitement de données réelles par interpolation linéaire
+- Phase 2 : Correction de données réelles avec adaptation de la méthode de traitement
+
+### Phase 0 : Données simulées
+
+#### 00_constant_data_simul.py
+
+Ce script simule des données de charge électrique avec un pas de temps régulier (choisi) entre deux dates (choisies).
+
+Pour cela on importe les modules Python nécessaires:
+
+```python
+import os
+import datetime as dt
+import random as rd
+import pandas as pd
+```
+
+- os : sert à créer un chemin d'exportation dans le répertoire du projet
+- datetime : ce module formate les dates au format datetime, permettant de préciser chaque élément des dates (année, mois, jour, heure, ...)
+- random : permet de choisir aléatoirement des valeurs de puissance dans une liste de valeurs
+- pandas : permet d'étudier des tableaux sous forme de dataframes, plus simples à manipuler et avec un temps d'exécution plus faible
+
+La génération de données repose sur la fonction create_const_csv_data() :
+
+```python
+def create_const_csv_data(start_time: dt.datetime, end_time: dt.datetime,
+                          time_step: int, data: list):
+    simul = pd.DataFrame(columns=['date', 'puissance_w'])
+    time = start_time
+
+    while time < end_time:
+        line = [time, data[rd.randint(0, len(data) - 1)]]
+        simul.loc[len(simul)] = line
+        time += dt.timedelta(minutes=time_step)
+
+    output_path = os.path.join('input', '00_simulation_' + str(time_step)
+                               + 'min_const.csv')
+    simul.to_csv(output_path, sep=',', index=False, header=True,
+                 encoding='utf-8')
+```
+
+Cette fonction prend 4 arguments:
+
+- start_time : la date de début au format datetime, antérieure à end_time
+- end_time : la date de fin au format datetime, postérieure à start_time
+- time_step : le pas temporel souhaité en minutes, entier
+- data : liste qui contient les valeurs possibles de puissance en W
+
+Elle ne renvoie pas de résultat.
+
+En premier on crée le dataframe simul qui enregistrera les données à exporter,
+et la variable time qui prend la valeur de start_time, et qui servira d'indice à
+l'itération.
+
+Ensuite avec une boucle while qui prend comme condition que la date de fin **ne soit pas atteinte** (time < end_time), on crée une liste nommée line de 2 éléments avec la variable time et une valeur de data choisie en réalisant un **tirage aléatoire parmi les indices de la liste** avec le module random `data[rd.randint(0, len(data) - 1)]`, on ajoute cette liste line à la liste simul `simul.loc[len(simul)] = line`, et on ajoute à time **le pas temporel en minutes** (time += dt.timedelta(**minutes=time_step**))
+
+Une fois que la boucle finit ses itérations, on crée un chemin d'exportation pour le ficher CSV avec la variable output_path. On utilise la méthode os.path.join() pour adapter le chemin à l'OS de l'utilisateur. Comme le fichier exporté sera étudié par la suite, on exporte le résultat dans le sous-répertoire input, à la différence des autres scripts qui exportent tous dans output.
+
+Enfin, on exporte la liste simul au format CSV avec la bibliothèque pandas.
+
+Maintenant que la fonction est définie , on peut choisir une date de début,
+une date de fin et une liste de valeurs possibles.
+
+```python
+data = [1000, 2000, 3000, 4000, 5000, 6000]
+start_time = dt.datetime(2023, 1, 1)
+end_time = dt.datetime(2024, 1, 1)
+
+create_const_csv_data(start_time=start_time, end_time=end_time, time_step=20,
+                      data=data)
+```
+
+#### 01_simul_data_analysis.py
+
+Ce script se sert des données générées dans le script 00_constant_data_simul.py
+et génère un tableau des moyennes journalières de puissance sur la période
+étudiée
+
+```python
+import os
+import pandas as pd
+```
+
+On importe d'abord les librairies os et pandas vues précédemment, pour les mêmes
+usages, c'est-à-dire adaptation à l'OS utilisateur, création de chemins et manipulation de
+dataframes.
+
+```python
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+tools_dir = os.path.join(parent_dir, 'tools')
+sys.path.append(tools_dir)
+import delimiter as dlmt
+```
+
+Ensuite, à l'aide du module sys, on importe le script `delimiter.py` qui détecte
+le séparateur du CSV étudié.
+
+```python
+entry_path = os.path.join('input', '00_simulation_20min_const.csv')
+
+delimiter = dlmt.detect_delimiter(entry_path)
+simul = pd.read_csv(entry_path, sep=delimiter)
+simul['date'] = pd.to_datetime(simul['date'].str.split('+').str[0],
+                               format="%Y-%m-%d %H:%M:%S")
+print(simul.head(5))
+```
+
+```python
+df=pd.read_csv('output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv',';')
+print(df.head(20))
+```
+
+## Contribution
