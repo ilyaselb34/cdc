@@ -58,5 +58,6 @@ handles = [
     mpatches.Patch(color='blue', label='Hiver')
 ]
 plt.legend(handles=handles, title='Saison')
+plt.savefig('plots/consommation_energie_mois.png')
 
 plt.show()
