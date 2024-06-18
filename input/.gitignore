@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# But not these files...
+!Enedis_SGE_HDM_A06GKIR0.csv
+!.gitignore
+# ...even if they are in subdirectories
+!*/

@@ -21,7 +21,7 @@ data = pd.read_csv(file_name, sep=',', encoding='utf-8')
 data['date'] = pd.to_datetime(data['date'])
 
 
-def assign_month_name(month_num):
+'''def assign_month_name(month_num):
     """Assigner les noms des mois en français à partir du numéro du mois.
        On n'utilise pas les fonctions de datetime pour éviter les problèmes
        d'encodage.
@@ -87,3 +87,4 @@ data['mois'] = data['date'].dt.month.map(assign_month_name)
 
 # Print unique months
 print(data['mois'].unique())
+'''
