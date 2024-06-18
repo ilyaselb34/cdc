@@ -50,12 +50,11 @@ def main(file_name: str, timestep: int):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process and clean'
-                                     'a CSV file.')
+    parser = argparse.ArgumentParser(description='Ce script nettoie une courbe de charge CSV')
     parser.add_argument('--input_csv', '-i', type=str, required=True,
-                        help='nom fichier csv')
-    parser.add_argument('--timestep', '-t', type=int, required=True,
-                        help='pas temporel en minutes')
+                          help='Fichier CSV en entrée. Doit contenir des colonnes nommées "Horodate" et "Valeur"')
+    parser.add_argument('--timestep', '-t', type=int, default=60,
+                        help='Pas de temps en minutes du CSV en sortie. Defaut : 60 minutes')
 
     args = parser.parse_args()
 
