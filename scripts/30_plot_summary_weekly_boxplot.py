@@ -1,14 +1,22 @@
+"""
+Author: Ilyas El Boujadaini
+
+Content: Visualization of the daily consumption by day of the week using a
+         boxplot.
+"""
 import pandas as pd
 import locale
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import re
+import os
 
 # Set locale for day names in French
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 # File path
-file_name = r'output\Enedis_SGE_HDM_A06229H0_cleaned.csv'
+file_name = r'output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv'
 
 # Load data
 data = pd.read_csv(file_name, sep=',')
@@ -63,14 +71,35 @@ del data_week['date_sans_heure']
 del data_week['puissance_w']
 
 print(data_week.head())
-data_week.to_csv('tkss.csv', index=False)
+
+pattern = r'Enedis_SGE_HDM_(.*?)_cleaned\.csv'
+
+# Search for the match in the string
+match = re.search(pattern, file_name)
+
+if match:
+    # Extract the corresponding part
+    result = match.group(1)
+    # Create the output path with the extracted text
+    exit_path = os.path.join('plots', 'boxplot_daily_' + result + '.png')
+else:
+    exit_path = 'No match found'
+match = re.search(pattern, file_name)
+
+if match:
+    # Extract the corresponding part
+    result = match.group(1)
+    # Create the output path with the extracted text
+    exit_path = os.path.join('plots', 'boxplot_journalier_' + result + '.png')
+else:
+    exit_path = 'No match found'
 
 # Create the plot
 plt.figure(figsize=(12, 6))
 sns.boxplot(x='jour_semaine', y='energie_kwh', data=data_week,
             showfliers=False, order=['lundi', 'mardi', 'mercredi', 'jeudi',
                                      'vendredi', 'samedi', 'dimanche'],
-            label='Boxplot', color='white')
+            color='white')
 
 # Plot the stripplot with the individual colors
 for color in data_week['couleur'].unique():
@@ -95,5 +124,5 @@ plt.xlabel('Jour de la semaine')
 plt.ylabel('Consommation Journalière (kWh)')
 plt.title(f'Consommation par jour de la semaine\n'
           f'Ce graphique concerne des valeurs récoltées du {date1} au {date2}')
-plt.savefig('plots/A06GKIR0_daily_mean.png')
+plt.savefig(exit_path)
 plt.show()

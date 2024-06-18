@@ -1,12 +1,21 @@
+"""
+Author: Ilyas El Boujadaini
+
+Content: Visualization of the average power profile per hour for each day
+         of the week using a line graph.
+"""
+
 import pandas as pd
 import locale
 import matplotlib.pyplot as plt
+import re
+import os
 
 # Set locale for day names in French
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 # File path
-file_name = r'output\Enedis_SGE_HDM_A06229H0_cleaned.csv'
+file_name = r'output\Enedis_SGE_HDM_A06GKIR0_cleaned.csv'
 
 # Load data
 data = pd.read_csv(file_name, sep=',')
@@ -22,6 +31,24 @@ data['heure'] = data['date'].dt.strftime('%H:%M:%S')
 weekly_data = data.groupby(['jour_semaine', 'heure'])[
     'puissance_kw'].mean().reset_index()
 mean_data = weekly_data.groupby('heure')['puissance_kw'].mean().reset_index()
+
+pattern = r'Enedis_SGE_HDM_(.*?)_cleaned\.csv'
+
+# Recherche de la correspondance dans la chaîne
+match = re.search(pattern, file_name)
+
+if match:
+    # Extraire la partie correspondante
+    result = match.group(1)
+    # Créer le chemin de sortie avec le texte extrait
+    exit_path = os.path.join('plots', 'profil_puissance_jour_' + result
+                             + '.png')
+else:
+    exit_path = 'No match found'
+
+# Définir les dates de début et de fin
+date1 = data['date'].min().strftime('%d/%m/%Y')
+date2 = data['date'].max().strftime('%d/%m/%Y')
 
 # Create a figure and axis
 plt.figure(figsize=(12, 8))
@@ -46,8 +73,9 @@ ax.plot(mean_data['heure'], mean_data['puissance_kw'], color='black',
 # Set labels and title
 plt.xlabel('Heure')
 plt.ylabel('Puissance Moyenne (kW)')
-plt.title('Profil de la Puissance Moyenne par Heure pour Chaque Jour de'
-          'la Semaine')
+plt.title(f'Profil de la Puissance Moyenne par Heure pour Chaque Jour de '
+          'la Semaine\n'
+          f'Ce graphique concerne des valeurs récoltées du {date1} au {date2}')
 plt.xticks(rotation=45)
 plt.grid(True)
 
@@ -56,5 +84,5 @@ plt.legend()
 
 # Save and show the plot
 plt.tight_layout()
-plt.savefig('plots/progil_puissance.png')
+plt.savefig(exit_path)
 plt.show()

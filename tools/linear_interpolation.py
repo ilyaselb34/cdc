@@ -10,21 +10,6 @@ import datetime as dt
 
 
 def linear_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
-    """Data linear interpolation for irregular time step. Also interpolates
-    whole days if the time step is too big, so we have to improve this
-    functionnality later.
-
-    Args:
-        data (pd.DataFrame): pandas Dataframe with the data to interpolate,
-            columns are 'date', 'puissance_w' and 'type_valeur'.
-        ind_step (int): the index of the irregular step to correct.
-        wanted_step (int): the wanted time step between each data point
-            (in minutes). The time step must be a divisor of 60.
-
-    Returns:
-        res (pd.DataFrame): the interpolated data.
-    """
-
     # Create a new dataframe to store the interpolated data
     res = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])
 

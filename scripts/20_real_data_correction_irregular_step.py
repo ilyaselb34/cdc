@@ -1,7 +1,7 @@
 """
 Author: Ilyas El Boujadaini
 
-Content: Interpolation of the time step for irregular real data.
+Content: Correction of the whole dataset.
 """
 
 import os
@@ -34,11 +34,10 @@ del data['Valeur']
 # export the final result in a csv file
 
 data_corrected = crct.dataset_correction(data, 60)
-data_corrected['jour_semaine'] = data_corrected['date'].dt.strftime('%A')
 data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
                                      / pd.Timedelta(minutes=1)).fillna(0)
 step_change = data_corrected[data_corrected['pas_temps'] != data_corrected[
     'pas_temps'].shift()]
 print(step_change)
 exit_path = fn.exit_file_name(file_name)
-data_corrected.to_csv(exit_path, sep=',', index=False)
+data_corrected.to_csv(exit_path, sep=',', index=False, encoding='utf-8')
