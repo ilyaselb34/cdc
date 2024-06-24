@@ -83,7 +83,7 @@ if match:
     # Extraire la partie correspondante
     result = match.group(1)
     # Créer le chemin de sortie avec le texte extrait
-    exit_path = os.path.join('plots', 'profil_annuel_mois_' + result + '.png')
+    exit_path = os.path.join('plots', result + '_profil_annuel_mois.png')
 else:
     exit_path = 'No match found'
 

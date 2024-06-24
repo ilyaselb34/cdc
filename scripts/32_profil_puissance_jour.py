@@ -41,7 +41,7 @@ if match:
     # Extraire la partie correspondante
     result = match.group(1)
     # Créer le chemin de sortie avec le texte extrait
-    exit_path = os.path.join('plots', 'profil_puissance_jour_' + result
+    exit_path = os.path.join('plots', result + '_profil_puissance_jour' +
                              + '.png')
 else:
     exit_path = 'No match found'

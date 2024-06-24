@@ -81,16 +81,7 @@ if match:
     # Extract the corresponding part
     result = match.group(1)
     # Create the output path with the extracted text
-    exit_path = os.path.join('plots', 'boxplot_daily_' + result + '.png')
-else:
-    exit_path = 'No match found'
-match = re.search(pattern, file_name)
-
-if match:
-    # Extract the corresponding part
-    result = match.group(1)
-    # Create the output path with the extracted text
-    exit_path = os.path.join('plots', 'boxplot_journalier_' + result + '.png')
+    exit_path = os.path.join('plots', result + '_boxplot_journalier.png')
 else:
     exit_path = 'No match found'
 

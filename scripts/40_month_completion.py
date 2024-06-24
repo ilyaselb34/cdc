@@ -102,13 +102,20 @@ print(data_month)
 data_month.to_csv('input/conso.csv',sep=',')
 
 nrj_juin = data_month[data_month['mois'] == 'juin']['energie_kwh'].values
-jrs_juin = data_month[data_month['mois'] == 'juin']['nb_jours']
+jrs_juin = data_month[data_month['mois'] == 'juin']['nb_jours'].values
 print(nrj_juin, jrs_juin)
 nrj_septembre = 2588.25
-jrs_septembre = data_month[data_month['mois'] == 'septembre']['nb_jours']
+jrs_septembre = data_month[data_month['mois'] == 'septembre'][ 'nb_jours'].values
 nrj_ref = nrj_juin / jrs_juin * jrs_septembre
 facteur = nrj_septembre / nrj_ref
-data_test = data.loc[data['mois'] == 'juin']
-data_test.loc[:, 'energie_kwh'] = data_test['energie_kwh'] * facteur
-res = data_test.groupby('mois')['energie_kwh'].sum()
+data_test = data[data['mois'] == 'juin'].copy()
+data_test['date'] = data_test['date'] + pd.DateOffset(months=3) # Change the dates to September
+data_test['mois'] = 'septembre'  # Update the month name to September
+data_test['energie_kwh'] *= facteur  # Apply the adjustment factor
+
+# Concatenate the adjusted data back to the original DataFrame
+data = pd.concat([data, data_test], ignore_index=True)
+
+# Check the result for September
+res = data.groupby('mois')['energie_kwh'].sum()
 print(res)
