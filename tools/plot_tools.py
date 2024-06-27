@@ -4,9 +4,19 @@ import numpy as np
 import os
 import pandas as pd
 import seaborn as sns
+import datetime as dt
 
 
-def assign_month_name(month_num):
+def assign_month_name(month_num: int):
+    """This function assigns the month name in French based on the month
+       number.
+
+    Args:
+        month_num (int): the month number from 1 to 12
+
+    Returns:
+        res (str): string representing the month in French
+    """
     months_fr = {
         1: 'janvier',
         2: 'février',
@@ -21,10 +31,19 @@ def assign_month_name(month_num):
         11: 'novembre',
         12: 'décembre'
     }
-    return months_fr.get(month_num, 'inconnu')
+    res = months_fr.get(month_num, 'inconnu')
+    return res
 
 
-def get_season_color(date):
+def get_season_color(date: dt.datetime):
+    """Attributes a color to a date based on the season.
+
+    Args:
+        date (dt.datetime): the date to attribute a color to
+
+    Returns:
+        res (str): the name of the season corresponding to the date
+    """
     year = date.year
     spring = pd.Timestamp(f'{year}-03-21')
     summer = pd.Timestamp(f'{year}-06-21')
@@ -32,19 +51,51 @@ def get_season_color(date):
     winter = pd.Timestamp(f'{year}-12-21')
 
     if spring <= date < summer:
-        return 'green'  # Spring
+        res = 'green'  # Spring
     elif summer <= date < autumn:
-        return 'yellow'  # Summer
+        res = 'yellow'  # Summer
     elif autumn <= date < winter:
-        return 'orange'  # Autumn
+        res = 'orange'  # Autumn
     else:
-        return 'blue'  # Winter
+        res = 'blue'  # Winter
+    return res
 
 
 # Load data
-def boxplot(prefix, date1, date2, data_week):
-    # Plot 1: Boxplot Journalier
-    exit_path1 = os.path.join('plots', prefix + '_boxplot_journalier.png')
+def boxplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
+            date2: dt.datetime):
+    """This function creates a boxplot of the daily consumption for each day
+       of the week.
+
+    Args:
+        data (pd.Dataframe): the cleaned data to plot
+        prefix (str): the name of the studied CSV file, without the extension
+        date1 (dt.datetime): the starting date of the data
+        date2 (dt.datetime): the ending date of the data
+    Returns:
+        None
+    """
+    exit_path = os.path.join('plots', prefix + '_boxplot_journalier.png')
+    grouped_data = data.groupby('date_sans_heure')
+
+    # Calculate the sum of 'puissance_w' for each group
+    somme_puissance_par_date = grouped_data['puissance_w'].sum()
+
+    # Reset the index to get a DataFrame
+    data_week = somme_puissance_par_date.reset_index()
+
+    # Convert 'date_sans_heure' to datetime type
+    data_week['date'] = pd.to_datetime(data_week['date_sans_heure'])
+
+    # Extract the day of the week in French
+    data_week['jour_semaine'] = data_week['date'].dt.strftime('%A')
+    data_week['energie_kwh'] = data_week['puissance_w'] / 1000
+
+    # Apply the function to the 'date' column to create the 'couleur' column
+    data_week['couleur'] = data_week['date'].apply(get_season_color)
+
+    del data_week['date_sans_heure']
+    del data_week['puissance_w']
     plt.figure(figsize=(12, 6))
     sns.boxplot(x='jour_semaine', y='energie_kwh', data=data_week,
                 showfliers=False, order=['lundi', 'mardi', 'mercredi', 'jeudi',
@@ -74,46 +125,61 @@ def boxplot(prefix, date1, date2, data_week):
     plt.title(f'Consommation par jour de la semaine\n'
               f'Ce graphique concerne des valeurs récoltées du {date1} au'
               f' {date2}')
-    plt.savefig(exit_path1)
+    plt.ylim(bottom=0)
+    plt.savefig(exit_path)
 
 
-def barplot(data, prefix, date1, date2):
-    # Plot 2: Profil Annuel Mensuel
+def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
+            date2: dt.datetime):
+    """This function creates a barplot of the monthly consumption for each
+       month
+
+    Args:
+        data (pd.Dataframe): the cleaned data to plot
+        prefix (str): the name of the studied CSV file, without the extension
+        date1 (dt.datetime): the starting date of the data
+        date2 (dt.datetime): the ending date of the data
+    Returns:
+        None
+    """
     data['mois'] = data['date'].dt.month
-    data['nom_mois'] = data['mois'].map(assign_month_name) + ' ' + data[
-        'date'].dt.year.astype(str)
-    data['mois_annee'] = data['date'].dt.strftime('%Y-%m')
+    data['nom_mois'] = data['mois'].map(assign_month_name)
+    data['année'] = data['date'].dt.year
 
-    grouped_data = data.groupby('mois_annee')
-    somme_puissance_par_mois = grouped_data['puissance_w'].sum().reset_index()
-
-    data_month = somme_puissance_par_mois.merge(
-        data[['mois_annee', 'nom_mois']].drop_duplicates(),
-        on='mois_annee',
-        how='left'
-    )
+    grouped_data = data.groupby(['année', 'mois', 'nom_mois'])
+    data_month = grouped_data['puissance_w'].sum().reset_index()
 
     data_month['energie_kwh'] = data_month['puissance_w'] / 1000
     del data_month['puissance_w']
 
+    for i in range(1, 13):
+        if i not in data_month['mois'].values:
+            ligne = pd.DataFrame(
+                {'mois': i, 'nom_mois': assign_month_name(i),
+                 'année': data_month['année'][0],
+                 'energie_kwh': 0},
+                index=[0])
+            data_month = pd.concat([data_month, ligne]).reset_index(drop=True)
+    data_month = data_month.sort_values(by=['mois'])
+    print(data_month)
+    print(data_month.dtypes)
+
     data_month['couleur'] = 'blue'
-    data_month.loc[data_month['mois_annee'].str.contains('-03|-04|-05'),
+    data_month.loc[(data_month['mois'] >= 4) & (data_month['mois'] <= 6),
                    'couleur'] = 'green'
-    data_month.loc[data_month['mois_annee'].str.contains('-06|-07|-08'),
+    data_month.loc[(data_month['mois'] >= 7) & (data_month['mois'] <= 9),
                    'couleur'] = 'yellow'
-    data_month.loc[data_month['mois_annee'].str.contains('-09|-10|-11'),
-                   'couleur'] = 'orange'
+    data_month.loc[data_month['mois'] >= 10, 'couleur'] = 'orange'
 
-    exit_path2 = os.path.join('plots', prefix + '_profil_annuel_mois.png')
+    exit_path = os.path.join('plots', prefix + '_profil_annuel_mois.png')
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     sns.barplot(x='nom_mois', y='energie_kwh', data=data_month,
                 palette=data_month['couleur'].tolist())
     plt.xlabel('Mois')
     plt.ylabel('Energie (kWh)')
-    plt.title(f'Consommation par mois\n'
-              f'Ce graphique concerne des valeurs récoltées du {date1} au'
-              f' {date2}')
+    plt.title(f'Consommation par mois\nCe graphique concerne des valeurs'
+              f'récoltées du {date1} au {date2}')
 
     handles = [
         mpatches.Patch(color='green', label='Printemps'),
@@ -122,11 +188,22 @@ def barplot(data, prefix, date1, date2):
         mpatches.Patch(color='blue', label='Hiver')
     ]
     plt.legend(handles=handles, title='Saison')
-    plt.savefig(exit_path2)
+    plt.savefig(exit_path)
 
 
-def lineplot(data, prefix, date1, date2):
-    # Plot 3: Profil de Puissance Journalière
+def lineplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
+             date2: dt.datetime):
+    """This function creates a lineplot of the average power consumption for
+       each hour of the day and for each day of the week.
+
+    Args:
+        data (pd.Dataframe): the cleaned data to plot
+        prefix (str): the name of the studied CSV file, without the extension
+        date1 (dt.datetime): the starting date of the data
+        date2 (dt.datetime): the ending date of the data
+    Returns:
+        None
+    """
     data['jour_semaine'] = data['date'].dt.strftime('%A')
     data['heure'] = data['date'].dt.strftime('%H:%M:%S')
 
@@ -135,7 +212,7 @@ def lineplot(data, prefix, date1, date2):
     mean_data = weekly_data.groupby('heure')['puissance_kw'
                                              ].mean().reset_index()
 
-    exit_path3 = os.path.join('plots', prefix + '_profil_puissance_jour.png')
+    exit_path = os.path.join('plots', prefix + '_profil_puissance_jour.png')
 
     plt.figure(figsize=(12, 8))
     ax = plt.subplot(111)
@@ -161,4 +238,7 @@ def lineplot(data, prefix, date1, date2):
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(exit_path3)
+    plt.ylim(bottom=0)
+    if mean_data['puissance_kw'].max() < 10:
+        plt.ylim(top=10)
+    plt.savefig(exit_path)

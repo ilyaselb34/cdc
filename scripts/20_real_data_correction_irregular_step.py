@@ -25,7 +25,7 @@ import plot_tools as pt  # type: ignore
 
 
 # Initializes the path to the csv file, adapting it to the user's OS
-file_name = 'C:\Users\ily_y\OneDrive\Bureau\L3 MIASHS\stage\cdc\input\Enedis_SGE_HDM_A06GKKU4.csv'
+file_name = r'C:\Users\ily_y\OneDrive\Bureau\L3 MIASHS\stage\cdc\input\Enedis_SGE_HDM_A06GKKU4.csv'
 file_name = os.path.normpath(file_name)
 
 delimiter = dlmt.detect_delimiter(file_name)

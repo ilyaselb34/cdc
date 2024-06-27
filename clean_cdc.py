@@ -62,32 +62,10 @@ def main(file_name: str, timestep: int):
     data['date_sans_heure'] = data['date'].dt.date
     data['puissance_kw'] = data['puissance_w'] / 1000
 
-    # Group data by date without time
-    grouped_data = data.groupby('date_sans_heure')
+    date1 = data['date'].min().strftime('%d/%m/%Y')
+    date2 = data['date'].max().strftime('%d/%m/%Y')
 
-    # Calculate the sum of 'puissance_w' for each group
-    somme_puissance_par_date = grouped_data['puissance_w'].sum()
-
-    # Reset the index to get a DataFrame
-    data_week = somme_puissance_par_date.reset_index()
-
-    # Convert 'date_sans_heure' to datetime type
-    data_week['date'] = pd.to_datetime(data_week['date_sans_heure'])
-
-    # Extract the day of the week in French
-    data_week['jour_semaine'] = data_week['date'].dt.strftime('%A')
-    data_week['energie_kwh'] = data_week['puissance_w'] / 1000
-
-    date1 = data_week['date'].min().strftime('%d/%m/%Y')
-    date2 = data_week['date'].max().strftime('%d/%m/%Y')
-
-    # Apply the function to the 'date' column to create the 'couleur' column
-    data_week['couleur'] = data_week['date'].apply(pt.get_season_color)
-
-    del data_week['date_sans_heure']
-    del data_week['puissance_w']
-
-    pt.boxplot(prefix, date1, date2, data_week)
+    pt.boxplot(data, prefix, date1, date2)
     pt.barplot(data, prefix, date1, date2)
     pt.lineplot(data, prefix, date1, date2)
 
