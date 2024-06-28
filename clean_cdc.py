@@ -24,20 +24,24 @@ except locale.Error:
 
 
 def main(file_name: str, timestep: int):
+
+    # The file address may contain backslashes, we need to escape them
     file_name = file_name.replace('\\', '\\\\')
     delimiter = dlmt.detect_delimiter(file_name)
+
+    # Load data with the correct encoding
     data = pd.read_csv(file_name, sep=delimiter, header=2)
     data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
                                   format="%Y-%m-%dT%H:%M:%S")
-    del data['Horodate']
     data['puissance_w'] = data['Valeur']
-    del data['Valeur']
 
-    # We call the main function, verify the time step between each
-    # data point and export the final result in a csv file
-    print('Le fichier', file_name, 'contient des données mesurées entre les',
-          'dates suivantes :', data['date'][0], 'et', data['date'][len(data)
-                                                                   - 1])
+    del data['Valeur']
+    del data['Horodate']
+
+    date1 = data['date'].min().strftime('%d/%m/%Y')
+    date2 = data['date'].max().strftime('%d/%m/%Y')
+    print(f'Le fichier {file_name} contient des données mesurées entre le',
+          f'{date1} et {date2}.\n\n\n')
 
     data_corrected = crct.dataset_correction(data, timestep)
     data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
@@ -62,8 +66,12 @@ def main(file_name: str, timestep: int):
     data['date_sans_heure'] = data['date'].dt.date
     data['puissance_kw'] = data['puissance_w'] / 1000
 
-    date1 = data['date'].min().strftime('%d/%m/%Y')
-    date2 = data['date'].max().strftime('%d/%m/%Y')
+    pt.boxplot(data, prefix, date1, date2)
+    pt.barplot(data, prefix, date1, date2)
+    pt.lineplot(data, prefix, date1, date2)
+
+    if output_dir == None:
+        output_dir = prefix
 
     pt.boxplot(data, prefix, date1, date2)
     pt.barplot(data, prefix, date1, date2)
@@ -79,7 +87,9 @@ if __name__ == '__main__':
     parser.add_argument('--timestep', '-t', type=int, default=60,
                         help='Pas de temps en minutes du CSV en sortie.'
                         'Defaut : 60 minutes')
+    parser.add_argument('--output_dir', '-o', type=str, default=None,
+                        help='Nom du répertoire exporté. Par défaut, prend le même nom que le CSV en entrée.')
 
     args = parser.parse_args()
 
-    main(args.input_csv, args.timestep)
+    main(args.input_csv, args.timestep, args.output_dir)

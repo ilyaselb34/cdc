@@ -160,7 +160,7 @@ def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
                  'energie_kwh': 0},
                 index=[0])
             data_month = pd.concat([data_month, ligne]).reset_index(drop=True)
-    data_month = data_month.sort_values(by=['mois'])
+    data_month = data_month.sort_values(by=['mois']).reset_index(drop=True)
     print(data_month)
     print(data_month.dtypes)
 
