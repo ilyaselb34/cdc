@@ -23,7 +23,7 @@ except locale.Error:
     print("La locale 'fr_FR.UTF-8' n'est pas installée sur ce système.")
 
 
-def main(file_name: str, timestep: int):
+def main(file_name: str, timestep: int, output_dir: str):
 
     # The file address may contain backslashes, we need to escape them
     file_name = file_name.replace('\\', '\\\\')
@@ -38,10 +38,10 @@ def main(file_name: str, timestep: int):
     del data['Valeur']
     del data['Horodate']
 
-    date1 = data['date'].min().strftime('%d/%m/%Y')
-    date2 = data['date'].max().strftime('%d/%m/%Y')
+    date_min = data['date'].min().strftime('%d/%m/%Y')
+    date_max = data['date'].max().strftime('%d/%m/%Y')
     print(f'Le fichier {file_name} contient des données mesurées entre le',
-          f'{date1} et {date2}.\n\n\n')
+          f'{date_min} et {date_max}.\n\n\n')
 
     data_corrected = crct.dataset_correction(data, timestep)
     data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
@@ -53,8 +53,12 @@ def main(file_name: str, timestep: int):
 
     # On récupère le nom du fichier sans le chemin
     prefix = os.path.splitext(os.path.basename(file_name))[0]
+    if output_dir is None:
+        output_dir = prefix
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
 
-    exit_path = os.path.join('output', prefix + '_cleaned.csv')
+    exit_path = os.path.join(output_dir, prefix + '_cleaned.csv')
 
     data_corrected.to_csv(exit_path, sep=',', index=False)
     print('Le fichier', file_name + '_cleaned.csv a été exporté dans output')
@@ -66,16 +70,9 @@ def main(file_name: str, timestep: int):
     data['date_sans_heure'] = data['date'].dt.date
     data['puissance_kw'] = data['puissance_w'] / 1000
 
-    pt.boxplot(data, prefix, date1, date2)
-    pt.barplot(data, prefix, date1, date2)
-    pt.lineplot(data, prefix, date1, date2)
-
-    if output_dir == None:
-        output_dir = prefix
-
-    pt.boxplot(data, prefix, date1, date2)
-    pt.barplot(data, prefix, date1, date2)
-    pt.lineplot(data, prefix, date1, date2)
+    pt.boxplot_profil_journalier(data, prefix, date_min, date_max, output_dir)
+    pt.barplot_profil_annuel(data, prefix, date_min, date_max, output_dir)
+    pt.lineplot_profil_horaire(data, prefix, date_min, date_max, output_dir)
 
 
 if __name__ == '__main__':
@@ -88,7 +85,8 @@ if __name__ == '__main__':
                         help='Pas de temps en minutes du CSV en sortie.'
                         'Defaut : 60 minutes')
     parser.add_argument('--output_dir', '-o', type=str, default=None,
-                        help='Nom du répertoire exporté. Par défaut, prend le même nom que le CSV en entrée.')
+                        help='Nom du répertoire exporté. Par défaut, prend le'
+                        'même nom que le CSV en entrée.')
 
     args = parser.parse_args()
 

@@ -2,6 +2,6 @@
 env/
 .venv/
 *ipynb*
-
+*Enedis*
 # VS Code
 .flake8

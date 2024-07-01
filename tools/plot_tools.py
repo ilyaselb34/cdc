@@ -62,20 +62,22 @@ def get_season_color(date: dt.datetime):
 
 
 # Load data
-def boxplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
-            date2: dt.datetime):
+def boxplot_profil_journalier(data: pd.DataFrame, prefix: str,
+                              date_min: dt.datetime, date_max: dt.datetime,
+                              outfile: str):
     """This function creates a boxplot of the daily consumption for each day
        of the week.
 
     Args:
         data (pd.Dataframe): the cleaned data to plot
         prefix (str): the name of the studied CSV file, without the extension
-        date1 (dt.datetime): the starting date of the data
-        date2 (dt.datetime): the ending date of the data
+        date_min (dt.datetime): the starting date of the data
+        date_max (dt.datetime): the ending date of the data
+        outfile (str): the output directory
     Returns:
         None
     """
-    exit_path = os.path.join('plots', prefix + '_boxplot_journalier.png')
+    exit_path = os.path.join(outfile, prefix + '_boxplot_journalier.png')
     grouped_data = data.groupby('date_sans_heure')
 
     # Calculate the sum of 'puissance_w' for each group
@@ -123,22 +125,24 @@ def boxplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
     plt.xlabel('Jour de la semaine')
     plt.ylabel('Consommation Journalière (kWh)')
     plt.title(f'Consommation par jour de la semaine\n'
-              f'Ce graphique concerne des valeurs récoltées du {date1} au'
-              f' {date2}')
+              f'Ce graphique concerne des valeurs récoltées du {date_min} au'
+              f' {date_max}')
     plt.ylim(bottom=0)
     plt.savefig(exit_path)
 
 
-def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
-            date2: dt.datetime):
+def barplot_profil_annuel(data: pd.DataFrame, prefix: str,
+                          date_min: dt.datetime, date_max: dt.datetime,
+                          outfile: str):
     """This function creates a barplot of the monthly consumption for each
        month
 
     Args:
         data (pd.Dataframe): the cleaned data to plot
         prefix (str): the name of the studied CSV file, without the extension
-        date1 (dt.datetime): the starting date of the data
-        date2 (dt.datetime): the ending date of the data
+        date_min (dt.datetime): the starting date of the data
+        date_max (dt.datetime): the ending date of the data
+        outfile (str): the output directory
     Returns:
         None
     """
@@ -171,7 +175,7 @@ def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
                    'couleur'] = 'yellow'
     data_month.loc[data_month['mois'] >= 10, 'couleur'] = 'orange'
 
-    exit_path = os.path.join('plots', prefix + '_profil_annuel_mois.png')
+    exit_path = os.path.join(outfile, prefix + '_profil_annuel.png')
 
     plt.figure(figsize=(12, 6))
     sns.barplot(x='nom_mois', y='energie_kwh', data=data_month,
@@ -179,7 +183,7 @@ def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
     plt.xlabel('Mois')
     plt.ylabel('Energie (kWh)')
     plt.title(f'Consommation par mois\nCe graphique concerne des valeurs'
-              f'récoltées du {date1} au {date2}')
+              f'récoltées du {date_min} au {date_max}')
 
     handles = [
         mpatches.Patch(color='green', label='Printemps'),
@@ -191,16 +195,18 @@ def barplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
     plt.savefig(exit_path)
 
 
-def lineplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
-             date2: dt.datetime):
+def lineplot_profil_horaire(data: pd.DataFrame, prefix: str,
+                            date_min: dt.datetime, date_max: dt.datetime,
+                            outfile: str):
     """This function creates a lineplot of the average power consumption for
        each hour of the day and for each day of the week.
 
     Args:
         data (pd.Dataframe): the cleaned data to plot
         prefix (str): the name of the studied CSV file, without the extension
-        date1 (dt.datetime): the starting date of the data
-        date2 (dt.datetime): the ending date of the data
+        date_min (dt.datetime): the starting date of the data
+        date_max (dt.datetime): the ending date of the data
+        outfile (str): the output directory
     Returns:
         None
     """
@@ -212,7 +218,7 @@ def lineplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
     mean_data = weekly_data.groupby('heure')['puissance_kw'
                                              ].mean().reset_index()
 
-    exit_path = os.path.join('plots', prefix + '_profil_puissance_jour.png')
+    exit_path = os.path.join(outfile, prefix + '_profil_horaire.png')
 
     plt.figure(figsize=(12, 8))
     ax = plt.subplot(111)
@@ -232,8 +238,8 @@ def lineplot(data: pd.DataFrame, prefix: str, date1: dt.datetime,
     plt.ylabel('Puissance Moyenne (kW)')
     plt.title(f'Profil de la Puissance Moyenne par Heure pour Chaque Jour de '
               'la Semaine\n'
-              f'Ce graphique concerne des valeurs récoltées du {date1} au '
-              f'{date2}')
+              f'Ce graphique concerne des valeurs récoltées du {date_min} au '
+              f'{date_max}')
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.legend()
