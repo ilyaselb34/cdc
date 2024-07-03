@@ -193,7 +193,7 @@ source env/bin/activate
 - Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
 
 ```bash
-python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
+python clean_cdc.py --input_csv Enedis_SGE_HDM_A06GKIR0.csv --timestep 60
 ```
 
 ### Résultats

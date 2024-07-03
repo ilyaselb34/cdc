@@ -62,9 +62,8 @@ def get_season_color(date: dt.datetime):
 
 
 # Load data
-def boxplot_profil_journalier(data: pd.DataFrame, prefix: str,
-                              date_min: dt.datetime, date_max: dt.datetime,
-                              outfile: str):
+def boxplot_profil_journalier(data: pd.DataFrame, outfile: str,
+                              date_min: dt.datetime, date_max: dt.datetime):
     """This function creates a boxplot of the daily consumption for each day
        of the week.
 
@@ -73,11 +72,10 @@ def boxplot_profil_journalier(data: pd.DataFrame, prefix: str,
         prefix (str): the name of the studied CSV file, without the extension
         date_min (dt.datetime): the starting date of the data
         date_max (dt.datetime): the ending date of the data
-        outfile (str): the output directory
     Returns:
         None
     """
-    exit_path = os.path.join(outfile, prefix + '_boxplot_journalier.png')
+    exit_path = os.path.join(outfile, outfile + '_boxplot_journalier.png')
     grouped_data = data.groupby('date_sans_heure')
 
     # Calculate the sum of 'puissance_w' for each group
@@ -131,9 +129,8 @@ def boxplot_profil_journalier(data: pd.DataFrame, prefix: str,
     plt.savefig(exit_path)
 
 
-def barplot_profil_annuel(data: pd.DataFrame, prefix: str,
-                          date_min: dt.datetime, date_max: dt.datetime,
-                          outfile: str):
+def barplot_profil_annuel(data: pd.DataFrame, outfile: str,
+                          date_min: dt.datetime, date_max: dt.datetime):
     """This function creates a barplot of the monthly consumption for each
        month
 
@@ -142,7 +139,6 @@ def barplot_profil_annuel(data: pd.DataFrame, prefix: str,
         prefix (str): the name of the studied CSV file, without the extension
         date_min (dt.datetime): the starting date of the data
         date_max (dt.datetime): the ending date of the data
-        outfile (str): the output directory
     Returns:
         None
     """
@@ -175,7 +171,7 @@ def barplot_profil_annuel(data: pd.DataFrame, prefix: str,
                    'couleur'] = 'yellow'
     data_month.loc[data_month['mois'] >= 10, 'couleur'] = 'orange'
 
-    exit_path = os.path.join(outfile, prefix + '_profil_annuel.png')
+    exit_path = os.path.join(outfile, outfile + '_profil_annuel.png')
 
     plt.figure(figsize=(12, 6))
     sns.barplot(x='nom_mois', y='energie_kwh', data=data_month,
@@ -195,9 +191,8 @@ def barplot_profil_annuel(data: pd.DataFrame, prefix: str,
     plt.savefig(exit_path)
 
 
-def lineplot_profil_horaire(data: pd.DataFrame, prefix: str,
-                            date_min: dt.datetime, date_max: dt.datetime,
-                            outfile: str):
+def lineplot_profil_horaire(data: pd.DataFrame, outfile: str,
+                            date_min: dt.datetime, date_max: dt.datetime):
     """This function creates a lineplot of the average power consumption for
        each hour of the day and for each day of the week.
 
@@ -206,7 +201,6 @@ def lineplot_profil_horaire(data: pd.DataFrame, prefix: str,
         prefix (str): the name of the studied CSV file, without the extension
         date_min (dt.datetime): the starting date of the data
         date_max (dt.datetime): the ending date of the data
-        outfile (str): the output directory
     Returns:
         None
     """
@@ -218,7 +212,7 @@ def lineplot_profil_horaire(data: pd.DataFrame, prefix: str,
     mean_data = weekly_data.groupby('heure')['puissance_kw'
                                              ].mean().reset_index()
 
-    exit_path = os.path.join(outfile, prefix + '_profil_horaire.png')
+    exit_path = os.path.join(outfile, outfile + '_profil_horaire.png')
 
     plt.figure(figsize=(12, 8))
     ax = plt.subplot(111)
