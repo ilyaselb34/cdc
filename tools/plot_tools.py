@@ -1,7 +1,5 @@
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
 import seaborn as sns
 import datetime as dt
@@ -62,8 +60,8 @@ def get_season_color(date: dt.datetime):
 
 
 # Load data
-def boxplot_profil_journalier(data: pd.DataFrame, outfile: str,
-                              date_min: dt.datetime, date_max: dt.datetime):
+def boxplot_profil_hebdo(data: pd.DataFrame, outfile: str,
+                         date_min: dt.datetime, date_max: dt.datetime):
     """This function creates a boxplot of the daily consumption for each day
        of the week.
 
@@ -75,7 +73,7 @@ def boxplot_profil_journalier(data: pd.DataFrame, outfile: str,
     Returns:
         None
     """
-    exit_path = os.path.join(outfile, outfile + '_boxplot_journalier.png')
+    # exit_path = os.path.join(outfile, outfile + '_profil_hebdo.png')
     grouped_data = data.groupby('date_sans_heure')
 
     # Calculate the sum of 'puissance_w' for each group
@@ -126,7 +124,7 @@ def boxplot_profil_journalier(data: pd.DataFrame, outfile: str,
               f'Ce graphique concerne des valeurs récoltées du {date_min} au'
               f' {date_max}')
     plt.ylim(bottom=0)
-    plt.savefig(exit_path)
+    plt.savefig(outfile)
 
 
 def barplot_profil_annuel(data: pd.DataFrame, outfile: str,
@@ -161,38 +159,19 @@ def barplot_profil_annuel(data: pd.DataFrame, outfile: str,
                 index=[0])
             data_month = pd.concat([data_month, ligne]).reset_index(drop=True)
     data_month = data_month.sort_values(by=['mois']).reset_index(drop=True)
-    print(data_month)
-    print(data_month.dtypes)
-
-    data_month['couleur'] = 'blue'
-    data_month.loc[(data_month['mois'] >= 4) & (data_month['mois'] <= 6),
-                   'couleur'] = 'green'
-    data_month.loc[(data_month['mois'] >= 7) & (data_month['mois'] <= 9),
-                   'couleur'] = 'yellow'
-    data_month.loc[data_month['mois'] >= 10, 'couleur'] = 'orange'
-
-    exit_path = os.path.join(outfile, outfile + '_profil_annuel.png')
 
     plt.figure(figsize=(12, 6))
-    sns.barplot(x='nom_mois', y='energie_kwh', data=data_month,
-                palette=data_month['couleur'].tolist())
+    sns.barplot(x='nom_mois', y='energie_kwh', data=data_month)
     plt.xlabel('Mois')
     plt.ylabel('Energie (kWh)')
-    plt.title(f'Consommation par mois\nCe graphique concerne des valeurs'
+    plt.title(f'Consommation par mois\nCe graphique concerne des valeurs '
               f'récoltées du {date_min} au {date_max}')
 
-    handles = [
-        mpatches.Patch(color='green', label='Printemps'),
-        mpatches.Patch(color='yellow', label='Été'),
-        mpatches.Patch(color='orange', label='Automne'),
-        mpatches.Patch(color='blue', label='Hiver')
-    ]
-    plt.legend(handles=handles, title='Saison')
-    plt.savefig(exit_path)
+    plt.savefig(outfile)
 
 
-def lineplot_profil_horaire(data: pd.DataFrame, outfile: str,
-                            date_min: dt.datetime, date_max: dt.datetime):
+def lineplot_profil_journalier(data: pd.DataFrame, outfile: str,
+                               date_min: dt.datetime, date_max: dt.datetime):
     """This function creates a lineplot of the average power consumption for
        each hour of the day and for each day of the week.
 
@@ -211,8 +190,6 @@ def lineplot_profil_horaire(data: pd.DataFrame, outfile: str,
         'puissance_kw'].mean().reset_index()
     mean_data = weekly_data.groupby('heure')['puissance_kw'
                                              ].mean().reset_index()
-
-    exit_path = os.path.join(outfile, outfile + '_profil_horaire.png')
 
     plt.figure(figsize=(12, 8))
     ax = plt.subplot(111)
@@ -238,7 +215,9 @@ def lineplot_profil_horaire(data: pd.DataFrame, outfile: str,
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
+
+    # on fixe les limites haute et basse de l'axe des ordonnées
     plt.ylim(bottom=0)
     if mean_data['puissance_kw'].max() < 10:
         plt.ylim(top=10)
-    plt.savefig(exit_path)
+    plt.savefig(outfile)

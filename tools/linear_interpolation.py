@@ -10,6 +10,17 @@ import datetime as dt
 
 
 def linear_interpolation(data: pd.DataFrame, ind_step: int, wanted_step: int):
+    """Cette fonction complète les données manquantes entre deux points de
+    mesure consécutifs par interpolation linéaire
+
+    Args:
+        data (pd.DataFrame): le dataframe contenant les données à interpoler
+        ind_step (int): l'indice du point de mesure à interpoler
+        wanted_step (int): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # Create a new dataframe to store the interpolated data
     res = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])
 

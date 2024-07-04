@@ -28,12 +28,13 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     data['pas_temps'] = [0] + (data['date'].diff() / pd.Timedelta(minutes=1)
                                ).fillna(0)
 
-    # Copy the data to avoid modifying the original DataFrame in case it needs
-    # to be studied
+    # Cette fonction permet de moyenner les données à pas de temps faible
+    # (<60min)
     df = avg.averaging_low_step(data)
 
     for i in range(1, len(df)):
-        # At first, use linear interpolation for low time steps
+        # On utiliste l'interpolation linéaire pour les pas de temps inférieurs
+        # à 240 minutes (4 heures)
         if df['pas_temps'][i] > wanted_step and df['pas_temps'][i] < 240:
             res = pd.concat([res, itrp.linear_interpolation(df, i, wanted_step)
                              ],
@@ -45,9 +46,8 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
     res['pas_temps'] = [0] + (res['date'].diff() / pd.Timedelta(minutes=1)
                               ).fillna(0)
 
-    # Use data duplication for time steps superior to 240 minutes
-    # Also use a second res DataFrame to iterate through the first one
-    # and concatenate them at the end
+    # On utilise la duplication de données par moyenne mobile pour les pas de
+    # temps supérieurs à 240 minutes
     res2 = pd.DataFrame(columns=['date', 'puissance_w', 'type_valeur'])
     for j in range(1, len(res)):
         if res['pas_temps'][j] >= 240:
@@ -56,9 +56,10 @@ def dataset_correction(data: pd.DataFrame, wanted_step: int):
                 res2 = pd.concat([res2, dup], ignore_index=True)
             else:
                 print("Skipping empty or all-NA DataFrame")
-    res = pd.concat([res, res2], ignore_index=True)
-    res = res.sort_values(by='date').reset_index(drop=True)
-    del res['pas_temps']
-    del data['pas_temps']
+    if not res2.empty and not res2.isna().all().all():
+        res = pd.concat([res, res2], ignore_index=True)
+        res = res.sort_values(by='date').reset_index(drop=True)
+        del res['pas_temps']
+        del data['pas_temps']
 
     return res
