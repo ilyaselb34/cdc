@@ -2,202 +2,73 @@
 
 ## Introduction
 
-Les données fournies par SGE au format CSV possèdent parfois des irrégularités temporelles qui constituent un obstacle à une étude optimale de ces données et à l'obtention de résultats optimaux. En clair, il arrive que des données enregistrées de manière régulière (ex: toutes les 30 min) subissent une interruption de ce pas de temps (ex: le pas passe à 120min sur une certaine durée), il manque alors une partie des données et il devient compliqué de réaliser des rapports.
+Les données de consommation électrique ou Courbes de Charge (CDC) électrique récupérées via le portail SGE d'Enedis au format CSV comportent parfois des irrégularités qui constituent un obstacle à leur étude. Il arrive que des données enregistrées de manière régulière (ex: toutes les 30 min) subissent une interruption de ce pas de temps (ex: le pas passe à 120min sur une certaine durée), il manque alors une partie des données, qui deviennent inexploitables pour leur étude en aval comme dans Archelios. Le présent projet permet d'automatiser le nettoyage de données de CDC, et l'export de graphiques permettant leur analyse.
 
-Quand cela arrive il faut manipuler les données à la main sur un tableur, ce qui peut s'avérer fastidieux sachant que les données sont récoltées sur une année entière. C'est pourquoi il est nécessaire d'automatiser ce traitement.
+## Installation
 
-Pour ce faire, nous allons utiliser un environnement virtuel Python.
-
-## Clonage du dépôt GitHub
-
-### Clonage sous Windows
-
-- Ouvrez l'invite de commande Windows PowerShell.
-- Placez vous dans le dossier dans lequel vous souhaitez cloner le dépôt avec la commande suivante (vous pouvez copier l'adresse avec clic droit dans la barre d'adresse de l'explorateur de fichiers Windows):
-
-```bash
-cd chemin\absolu\du\dossier
-```
-
-- Clonez le dépôt avec la commande:
+Via un terminal Linux ou Windows PowerShell, on commence par cloner le dépôt et se placer dedans :
 
 ```bash
 git clone https://github.com/ilyaselb34/cdc.git
+cd cdc/
 ```
 
-Le dépôt est maintenant cloné.
-
-### Clonage sous Linux
-
-- Ouvrez un terminal:
-- Placez-vous dans le dossier dans lequel vous souhaitez cloner le dépôt avec la commande suivante :
-
-```bash
-cd /chemin/absolu/du/dossier
-```
-
-- Clonez le dépôt avec la commande:
-
-```bash
-git clone https://github.com/ilyaselb34/cdc.git
-```
-
-Le dépôt est maintenant cloné.
-
-## Installation de l'environnement virtuel
-
-### Installation sous Windows
-
-- Ouvrez l'invite de commande Windows PowerShell si vous l'avez fermée
-- Placez vous dans le répertoire dans lequel vous avez cloné le dépôt avec la commande suivante si vous n'y êtes pas déjà.
-
-```bash
-cd chemin\absolu\du\dossier
-```
-
-- Placez vous dans le répertoire cdc avec
-
-```bash
-cd cdc
-```
-
-- Entrez la commande:
+Puis on va créer un environnement virtuel Python. Sous Windows, pour accorder les autorisations nécessaires à la création d'un environnement virtuel uniquement à cette session PowerShell et évite les risques de sécurité futurs :
 
 ```bash
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 ```
 
-Cela permet d'accorder les autorisations nécessaires à la création d'un environnement virtuel uniquement à cette session PowerShell et évite les risques de sécurité futurs
+Et on vérifie que la commande `Get-ExecutionPolicy` renvoie `RemoteSigned`
 
-- Facultatif : Vous pouvez vérifier le statut de l'autorisation avec la commande:
-
-```bash
-Get-ExecutionPolicy
-```
-
-La console doit renvoyer "RemoteSigned"
-
-- Entrez la commande:
+On crée l'environnement virtuel Python, que l'on nomme ici `env`, que l'on active :
 
 ```bash
 python -m venv env
+source env/bin/activate
 ```
 
-Cela crée l'environnement virtuel python nommé 'env'
-
-- Activez l'environnement avec la commande:
+Avec Windows :
 
 ```bash
 env\Scripts\Activate
 ```
 
-- Maintenant que l'environnement est activé, installez les modules nécessaires avec la commande :
+Et on installe les paquets nécessaires :
 
 ```bash
 pip install -r requirements.txt
 ```
-
-- Facultatif: vous pouvez consulter les modules installés dans l'environnement avec la commande :
-
-```bash
-pip freeze
-```
-
-L'environnement est prêt à être utilisé.
-
-### Installation sous Linux
-
-- Ouvrez un terminal si ce n'est pas déjà fait.
-- Placez-vous dans le répertoire dans lequel vous avez cloné le dépôt avec la commande suivante si vous n'y êtes pas déjà.
-
-```bash
-cd /chemin/absolu/du/dossier
-```
-
-- Placez-vous dans le répertoire cdc avec
-
-```bash
-cd cdc
-```
-
-- Entrez la commande :
-
-```bash
-python3 -m venv env
-```
-
-Cela crée l'environnement virtuel Python nommé 'env'.
-
-- Activez l'environnement avec la commande :
-
-```bash
-source env/bin/activate
-```
-
-- Maintenant que l'environnement est activé, installez les modules nécessaires avec la commande :
-
-```bash
-pip install -r requirements.txt
-```
-
-- Facultatif: vous pouvez consulter les modules installés dans l'environnement avec la commande :
-
-```bash
-pip freeze
-```
-
-L'environnement est prêt à être utilisé.
 
 ## Utilisation
 
-Supposons que vous ayez un fichier de courbes de charges à étudier/corriger, nommé Enedis_SGE_HDM_A06GKIR0.csv et que vous souhaitiez mettre ces données au pas de temps horaire (une mesure toutes les 60 min).
-
-Dans ce cas, vous appellerez le script main.py avec l'invite de commande de la manière suivante:
-
-### Utilisation sous Windows
-
-- Placez vous dans le répertoire cdc:
+Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `my_cdc.csv`. On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
 
 ```bash
-cd adresse\absolue\du\dossier
-cd cdc
+python clean_cdc.py --input_csv my_cdc.csv --timestep 60
 ```
 
-- Si l'environnement n'est pas déjà activé, activez le:
+Le script va, dans l'ordre :
+
+* Homogénéiser les données au pas de temps de 60 minutes.
+* Remplir les "trous" dans les données mesurées d'une durée inférieure à 4h par une **interpolation linéaire**.
+* Pour les trous supérieurs à 4h, il va faire la moyenne des données du même jour de la semaine précédente et de la semaine suivante. Par exemple, si il manque des données le lundi de la semaine 10 entre 8h et 14h, il va faire la moyenne des données du lundi de la semaine 9 de 8h à 14h, et du lundi de la semaine 11 de 8h à 14h.
+
+Le résultat va être exporté, dans un répertoire automatiquement créé portant le même nom que le fichier - ici `my_cdc/` - dans un fichier `my_cdc_cleaned.csv`.
+
+Puis le script va analyser ces données nettoyées en exportant, toujours dans le dans répertoire `my_cdc/`, les fichiers suivants :
+
+* `my_cdc_profil_journalier.png` : Un graphique superposant les 7 courbes de consommation horaire moyenne pour chaque jour de la semaine.
+* `my_cdc_profil_annuel.png` : un diagramme en barres de la consommation mensuelle totale de janvier à décembre.
+* `my_cdc_profil_hebdo.png` : une boite à moustache de la consommation quotidienne observé pour chaque jour de la semaine.
+
+En termes d'arborescence de fichiers, résultat est le suivant :
 
 ```bash
-env\Scripts\Activate
+├── my_cdc
+│   ├── my_cdc_cleaned.csv
+│   ├── my_cdc_profil_annuel.csv
+│   ├── my_cdc_profil_hebdo.csv
+│   └── my_cdc_profil_journalier.csv
+└── my_cdc.csv
 ```
-
-- Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
-
-```bash
-python clean_cdc.py --input_csv courbes_2023.csv --timestep 60
-```
-
-### Utilisation sous Linux
-
-- Placez vous dans le répertoire cdc:
-
-```bash
-cd /chemin/absolu/du/dossier
-cd cdc
-```
-
-- Si l'environnement n'est pas déjà activé, activez le:
-
-```bash
-source env/bin/activate
-```
-
-- Appelez maintenant le script main.py et utilisez les arguments --input_csv et --timestep:
-
-```bash
-python clean_cdc.py --input_csv Enedis_SGE_HDM_A06GKIR0.csv --timestep 60
-```
-
-### Résultats
-
-Le programme imprime alors un tableau à 2 lignes qui indique les lignes du CSV généré où le temps écoulé depuis la mesure précédente varie. Si le tableau ne contient que 2 lignes, c'est que le pas temporel est constant.
-
-Un tableau CSV nommé courbes_2023_cleaned.csv est alors exporté dans le sous répertoire output.
