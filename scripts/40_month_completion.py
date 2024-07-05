@@ -24,6 +24,7 @@ del data['puissance_w']
 
 date_min = data['date'].min()
 date_max = data['date'].max()
+print(date_max + dt.timedelta(days=1))
 print(f'Le fichier {file_name} contient des données mesurées entre le',
       f'{date_min} et {date_max}.\n\n\n')
 
@@ -35,14 +36,28 @@ grouped_data = data.groupby(['jour_semaine', 'heure'])
 # on sort un tableau pour chaque heure de la semaine (moyenne de la puissance)
 # nommé djh (pour date_jour_heure)
 djh = grouped_data['puissance_kwh'].mean().reset_index()
-# export pour vérification
-djh.to_csv('djh.csv', sep=',', index=False)
 
 # année de référence de l'étude
-year = date_min.year()
+year = date_min.year
+start_day = dt.datetime(year - 1, 12, 31)
 
-while date_max.year() == year:
-    date_max += dt.timedelta(days=1)
+date_min -= dt.timedelta(days=1)
+while date_min > start_day:
+    weekday = date_min.weekday()
+    day = djh[djh['jour_semaine'] == weekday]
+
+    res = pd.DataFrame(columns=['date', 'puissance_kwh', 'jour_semaine'])
+    res['date'] = f'{year}-{date_min.month}-{date_min.day} ' + day['heure']
+    res['date'] = pd.to_datetime(res['date'])
+    res['puissance_kwh'] = day['puissance_kwh']
+    res['jour_semaine'] = weekday
+    res['type_valeur'] = 'Mois manquant'
+    data = pd.concat([data, res], ignore_index=True)
+    date_min -= dt.timedelta(days=1)
+
+end_day = dt.datetime(year + 1, 1, 1)
+date_max += dt.timedelta(days=1)
+while date_max < end_day:
     weekday = date_max.weekday()
     day = djh[djh['jour_semaine'] == weekday]
 
@@ -52,6 +67,9 @@ while date_max.year() == year:
     res['puissance_kwh'] = day['puissance_kwh']
     res['jour_semaine'] = weekday
     res['type_valeur'] = 'Mois manquant'
+    data = pd.concat([data, res], ignore_index=True)
+    date_max += dt.timedelta(days=1)
 
-data = pd.concat([data, res], ignore_index=True)
-data.to_csv('test_copie.csv', sep=',', index=False)
+data.drop_duplicates(subset='date', keep='first', inplace=True)
+data.sort_values(by='date', inplace=True)
+data.to_csv('ehoe.csv', index=False, sep=',')
