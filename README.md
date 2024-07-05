@@ -42,33 +42,40 @@ pip install -r requirements.txt
 
 ## Utilisation
 
-Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `my_cdc.csv`. On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
+Pour utiliser le script, on commence par réactiver l'environnement virtuel
 
 ```bash
-python clean_cdc.py --input_csv my_cdc.csv --timestep 60
+cd cdc/
+source env/bin/activate
+```
+
+Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `Enedis_SGE_XXXX.csv`. On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
+
+```bash
+python clean_cdc.py --input_csv Enedis_SGE_XXXX.csv --timestep 60
 ```
 
 Le script va, dans l'ordre :
 
-* Homogénéiser les données au pas de temps de 60 minutes.
+* Homogénéiser les données au pas de temps de 60 minutes. Il va, pour chaque heure, effectuer la moyenne intra-horaire.
 * Remplir les "trous" dans les données mesurées d'une durée inférieure à 4h par une **interpolation linéaire**.
 * Pour les trous supérieurs à 4h, il va faire la moyenne des données du même jour de la semaine précédente et de la semaine suivante. Par exemple, si il manque des données le lundi de la semaine 10 entre 8h et 14h, il va faire la moyenne des données du lundi de la semaine 9 de 8h à 14h, et du lundi de la semaine 11 de 8h à 14h.
 
-Le résultat va être exporté, dans un répertoire automatiquement créé portant le même nom que le fichier - ici `my_cdc/` - dans un fichier `my_cdc_cleaned.csv`.
+Le résultat va être exporté, dans un répertoire automatiquement créé portant le même nom que le fichier - ici `Enedis_SGE_XXXX/` - dans un fichier `Enedis_SGE_XXXX_cleaned.csv`.
 
 Puis le script va analyser ces données nettoyées en exportant, toujours dans le dans répertoire `my_cdc/`, les fichiers suivants :
 
-* `my_cdc_profil_journalier.png` : Un graphique superposant les 7 courbes de consommation horaire moyenne pour chaque jour de la semaine.
-* `my_cdc_profil_annuel.png` : un diagramme en barres de la consommation mensuelle totale de janvier à décembre.
-* `my_cdc_profil_hebdo.png` : une boite à moustache de la consommation quotidienne observé pour chaque jour de la semaine.
+* `Enedis_SGE_XXXX_profil_journalier.png` : Un graphique superposant les 7 courbes de consommation horaire moyenne pour chaque jour de la semaine.
+* `Enedis_SGE_XXXX_profil_annuel.png` : un diagramme en barres de la consommation mensuelle totale de janvier à décembre.
+* `Enedis_SGE_XXXX_profil_hebdo.png` : une boite à moustache de la consommation quotidienne observé pour chaque jour de la semaine.
 
 En termes d'arborescence de fichiers, résultat est le suivant :
 
 ```bash
-├── my_cdc
-│   ├── my_cdc_cleaned.csv
-│   ├── my_cdc_profil_annuel.csv
-│   ├── my_cdc_profil_hebdo.csv
-│   └── my_cdc_profil_journalier.csv
-└── my_cdc.csv
+├── Enedis_SGE_XXXX               <-- output
+│   ├── Enedis_SGE_XXXX_cleaned.csv
+│   ├── Enedis_SGE_XXXX_profil_annuel.csv
+│   ├── Enedis_SGE_XXXX_profil_hebdo.csv
+│   └── Enedis_SGE_XXXX_profil_journalier.csv
+└── Enedis_SGE_XXXX.csv           <-- input
 ```
