@@ -1,6 +1,4 @@
-﻿Identifiant PRM;Type de donnees;Date de debut;Date de fin;Grandeur physique;Grandeur metier;Etape metier;Unite;Pas en minutes
-25621707630391;Courbe de charge;20/10/2020;20/10/2021;Energie active;Consommation;Comptage Brut;W;
-Horodate;Valeur
+﻿Horodate;Valeur
 2021-06-10T21:00:00+02:00;2318
 2021-06-10T22:00:00+02:00;2189
 2021-06-10T23:00:00+02:00;640

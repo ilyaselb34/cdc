@@ -30,9 +30,8 @@ def main(file_name: str, timestep: int, output_dir: str):
     delimiter = dlmt.detect_delimiter(file_name)
 
     # Load data with the correct encoding
-    data = pd.read_csv(file_name, sep=delimiter, header=2)
-    data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0],
-                                  format="%Y-%m-%dT%H:%M:%S")
+    data = pd.read_csv(file_name, sep=delimiter)
+    data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0])
     data['puissance_w'] = data['Valeur']
 
     del data['Valeur']
