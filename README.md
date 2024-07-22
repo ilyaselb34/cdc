@@ -49,7 +49,12 @@ cd cdc/
 source env/bin/activate
 ```
 
-Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `Enedis_SGE_XXXX.csv`. On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
+Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `Enedis_SGE_XXXX.csv`. Ce fichier doit obligatoirement 2 colonnes :
+
+* `'Horodate'` : la date et heure de la mesure.
+* `'Valeur'` : la puissance en watts.
+
+On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
 
 ```bash
 python clean_cdc.py --input_csv Enedis_SGE_XXXX.csv --timestep 60

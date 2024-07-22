@@ -30,34 +30,29 @@ def main(file_name: str, timestep: int, output_dir: str):
     delimiter = dlmt.detect_delimiter(file_name)
 
     # Load data with the correct encoding
-    data = pd.read_csv(file_name, sep=delimiter)
-    data['date'] = pd.to_datetime(data['Horodate'].str.split('+').str[0])
-    data['puissance_w'] = data['Valeur']
+    df = pd.read_csv(file_name, sep=delimiter)
+    df['date'] = pd.to_datetime(df['Horodate'].str.split('+').str[0])
+    df['puissance_w'] = df['Valeur']
 
-    del data['Valeur']
-    del data['Horodate']
+    # del data['Valeur']
+    # del data['Horodate']
 
-    date_min = data['date'].min().strftime('%d/%m/%Y')
-    date_max = data['date'].max().strftime('%d/%m/%Y')
-    etendue = (data['date'].max() - data['date'].min()).days
-    print(f'\n\n\nFichier: {file_name}\n'
-          f'Date min: {date_min}\n'
-          f'Date max: {date_max}\n'
-          f'Etendue: {etendue} jours\n\n\n')
+    # Petit echo pour faire un résumé des données
+    date_min = df['date'].min().strftime('%d/%m/%Y')
+    date_max = df['date'].max().strftime('%d/%m/%Y')
+    etendue = (df['date'].max() - df['date'].min()).days
+    print(f'Début: {date_min}; Fin: {date_max}; Etendue: {etendue}j')
 
-    # on bouche les trous de données brutes:
-    # soit par interpolation linéaire(moins de 4h)
-    # soit par moyenne mobile(plus de 4h)
-    data_corrected = crct.dataset_correction(data, timestep)
+    # On corrige les données brutes en "bouchant les trous" :
+    # Par interpolation linéaire, quand le trou estcelui-ci est <4h
+    # Par moyenne mobile, quand celui-ci est >4h
+    df = crct.dataset_correction(df, timestep)
 
     # sert à vérifier la continuité de l'écart entre les mesures corrigées
-    data_corrected['pas_temps'] = [0] + (data_corrected['date'].diff()
-                                         / pd.Timedelta(minutes=1)).fillna(0)
-    step_change = data_corrected[data_corrected['pas_temps']
-                                 != data_corrected['pas_temps'].shift()]
-    print('Ce tableau vérifie si des écarts de temps subsistent entre les '
-          'mesures')
-    print(step_change, '\n\n\n')
+    df['timestep'] = [0] + (df['date'].diff() / pd.Timedelta(minutes=1)).fillna(0)
+    df_check_timestep = df[df['timestep'] != df['timestep'].shift()]
+    print('Ce tableau vérifie si des écarts de temps subsistent entre les mesures')
+    print(df_check_timestep, '\n')
 
     # On récupère le nom du fichier sans le chemin
     prefix = os.path.splitext(os.path.basename(file_name))[0]
@@ -68,35 +63,32 @@ def main(file_name: str, timestep: int, output_dir: str):
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    # Export du CSV nettoyé
+    # On exporte le fichier CSV nettoyé
     output_csv = os.path.join(output_dir, prefix + '_cleaned.csv')
-    data_corrected.to_csv(output_csv, sep=',', index=False)
-
-    # Load data
-    data = data_corrected
+    df.to_csv(output_csv, sep=',', index=False)
 
     # Extract dates without time and additional columns
-    data['date_sans_heure'] = data['date'].dt.date
-    data['puissance_kw'] = data['puissance_w'] / 1000
+    df['date_sans_heure'] = df['date'].dt.date
+    df['puissance_kw'] = df['puissance_w'] / 1000
 
     # Profil journalier
     output_png = os.path.join(output_dir, prefix + '_profil_journalier.png')
-    pt.lineplot_profil_journalier(data, output_png, date_min, date_max)
+    pt.lineplot_profil_journalier(df, output_png, date_min, date_max)
 
     # Profil hebdomadaire
     output_png = os.path.join(output_dir, prefix + '_profil_hebdo.png')
-    pt.boxplot_profil_hebdo(data, output_png, date_min, date_max)
+    pt.boxplot_profil_hebdo(df, output_png, date_min, date_max)
 
     # Profil annuel
     output_png = os.path.join(output_dir, prefix + '_profil_annuel.png')
-    pt.barplot_profil_annuel(data, output_png, date_min, date_max)
+    pt.barplot_profil_annuel(df, output_png, date_min, date_max)
 
-    print(f'Graphiques exportés dans le dossier {output_dir}\n\n\n')
+    print(f'Les graphiques ont été exportés dans le dossier {output_dir}')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ce script nettoie une courbe'
-                                     'de charge CSV')
+                                     'de charge CSV et exporte 3 graphiques')
     parser.add_argument('--input_csv', '-i', type=str, required=True,
                         help='Fichier CSV en entrée. Doit contenir des'
                         'colonnes nommées "Horodate" et "Valeur"')
