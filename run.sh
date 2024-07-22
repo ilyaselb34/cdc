@@ -4,15 +4,16 @@
 sourcedir=$HOME/cdc/input/
 cd "$sourcedir" || exit 1
 
+# echo "Host : $(hostname)"
 
 # Voici l'adresse WebDAV du dossier nextcloud dans lequel les salariés versent les inputs
 nextcloudurl="https://clood.enercoop.org/remote.php/webdav/Production - REZO - Public/BE_CDC/nettoyage_CDC/input/"
 
 # On synchronise ce dossier local avec ce dossier nextcloud partagé
-echo "Synchronisation du dossier Nextcloud partagé avec $sourcedir ..."
+# echo "Synchronisation du dossier Nextcloud partagé avec $sourcedir ..."
 nextcloudcmd -n --silent . "$nextcloudurl" # -n permet de s'authentifier avec le fichier ~/.netrc
-echo "Synchronisation terminée"
-echo
+# echo "Synchronisation terminée"
+# echo
 
 # On active l'environnement vituel python nécessaire pour exécuter le script
 source "$HOME/cdc/env/bin/activate"
@@ -22,7 +23,8 @@ csv_files="$(find . -maxdepth 1 -type f -name '*.csv')"
 for f in $csv_files; do
     dir="${f%.*}"
     if [[ -e "$dir" ]]; then
-        echo "Le répertoire $dir existe déjà, skip."
+        # echo "Le répertoire $dir existe déjà, skip."
+        continue
     else
         echo "Nettoyage de $f et export dans $dir ..."
         python ~/cdc/clean_cdc.py --input_csv "$f" --output_dir "$dir"
@@ -30,8 +32,10 @@ for f in $csv_files; do
 done
 
 # On verse les outputs du dossier local vers le dossier nextcloud
-echo "Resynchronisation du dossier nextcloud avec $sourcedir ..."
+# echo
+# echo "Resynchronisation du dossier nextcloud avec $sourcedir ..."
 nextcloudcmd -n --silent . "$nextcloudurl"
+# echo "Synchronisation terminée"
 
 # Pour checker : 
 # firefox https://clood.enercoop.org/index.php/f/49323033
