@@ -31,11 +31,7 @@ done
 
 # On verse les outputs du dossier local vers le dossier nextcloud
 echo "Resynchronisation du dossier nextcloud avec $sourcedir ..."
-nextcloudcmd -n --silent "$sourcedir" "$nextcloudurl"
+nextcloudcmd -n --silent . "$nextcloudurl"
 
 # Pour checker : 
 # firefox https://clood.enercoop.org/index.php/f/49323033
-
-# Ajout du job à la crontab
-# Toutes les minutes du lundi au vendredi
-# */1 * * * 1-5 ~/cdc/run.sh

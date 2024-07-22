@@ -40,7 +40,7 @@ Et on installe les paquets nécessaires :
 pip install -r requirements.txt
 ```
 
-## Utilisation
+## Utilisation en local
 
 Pour utiliser le script, on commence par réactiver l'environnement virtuel
 
@@ -49,7 +49,7 @@ cd cdc/
 source env/bin/activate
 ```
 
-Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute nommée `Enedis_SGE_XXXX.csv`. Ce fichier doit obligatoirement 2 colonnes :
+Le script à lancer est `clean_cdc.py`. Supposons que l'on ait dans le dossier `input/` une CDC brute `Enedis_SGE_XXXX.csv`. Ce fichier doit obligatoirement 2 colonnes :
 
 * `'Horodate'` : la date et heure de la mesure.
 * `'Valeur'` : la puissance en watts.
@@ -57,7 +57,7 @@ Le script à lancer est `cleand_cdc.py`. Supposons que l'on ait une CDC brute no
 On met ces données au pas de temps horaire (60 minutes). On aurait pu omettre le paramètre `--timestep` car le pas de temps par défaut est déjà de 60 minutes :
 
 ```bash
-python clean_cdc.py --input_csv Enedis_SGE_XXXX.csv --timestep 60
+python clean_cdc.py --input_csv input/Enedis_SGE_XXXX.csv --timestep 60
 ```
 
 Le script va, dans l'ordre :
@@ -74,7 +74,7 @@ Puis le script va analyser ces données nettoyées en exportant, toujours dans l
 * `Enedis_SGE_XXXX_profil_annuel.png` : un diagramme en barres de la consommation mensuelle totale de janvier à décembre.
 * `Enedis_SGE_XXXX_profil_hebdo.png` : une boite à moustache de la consommation quotidienne observé pour chaque jour de la semaine.
 
-En termes d'arborescence de fichiers, résultat est le suivant :
+En termes d'arborescence de fichiers, résultat dans le dossier `input/` est le suivant :
 
 ```bash
 ├── Enedis_SGE_XXXX               <-- output
@@ -83,4 +83,27 @@ En termes d'arborescence de fichiers, résultat est le suivant :
 │   ├── Enedis_SGE_XXXX_profil_hebdo.csv
 │   └── Enedis_SGE_XXXX_profil_journalier.csv
 └── Enedis_SGE_XXXX.csv           <-- input
+```
+
+## Mise en production
+
+Le script `run.sh` va permettre de faire tourner le programme sur le serveur `geo.enercoop.infra` sans avoir à l'exécuter manuellement. Ce script va, dans l'ordre :
+
+* Synchroniser via WebDAV le [dossier Nextcloud](https://clood.enercoop.org/index.php/f/49323033) distant avec le dossier local `cdc/input/`
+* Activer automatiquement l'environnement virtuel Python.
+* Pour chaque fichier `myfile.csv` présent dans `cdc/input/`, si le répertoire `cdc/input/myfile/` n'existe pas encore, il va exécuter le script pour le créer et le remplir des outputs.
+* Re-synchroniser le dossier `cdc/input/` avec le dossier Nextcloud pour y verser les outputs .
+
+Pour synchroniser le dossier nextcloud, on utilise la commande suivante :
+
+```bash
+nextcloudcmd -n <sourcedir> <nextcloudurl>
+```
+
+Le paramètre `-n` permet d'utiliser le fichier `~/.netrc` pour s'authentifier sans avoir à rentrer le . Cela implique de créer ce fichier et de le remplir de la manière suivante avec ses IDs intranet :
+
+```text
+machine clood.enercoop.org
+login <prenom.nom>
+password <mypassword>
 ```
