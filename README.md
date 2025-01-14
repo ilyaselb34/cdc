@@ -94,13 +94,21 @@ Le script `run.sh` va permettre de faire tourner le programme sur le serveur `ge
 * Pour chaque fichier `myfile.csv` présent dans `cdc/input/`, si le répertoire `cdc/input/myfile/` n'existe pas encore, il va exécuter le script pour le créer et le remplir des outputs.
 * Re-synchroniser le dossier `cdc/input/` avec le dossier Nextcloud pour y verser les outputs .
 
-Pour synchroniser le dossier nextcloud, on utilise la commande suivante :
+Pour synchroniser le dossier nextcloud, on utilise la commande `nextcloudcmd` :
 
 ```bash
-nextcloudcmd -n <sourcedir> <nextcloudurl>
+nextcloudcmd -n --path <path>" <localdir> <nextcloudurl>
 ```
 
-Le paramètre `-n` permet d'utiliser le fichier `~/.netrc` pour s'authentifier sans avoir à rentrer le . Cela implique de créer ce fichier et de le remplir de la manière suivante avec ses IDs intranet :
+Où `<localdir>` est le dossier local à synchroniser, et `<path>` le chemin vers le dossier sur le serveur nextcloud `<nextcloudurl>`.
+
+La commande s'installe avec :
+
+```bash
+sudo apt install nextcloud-desktop-client
+```
+
+Le paramètre `-n` permet d'utiliser le fichier `~/.netrc` pour s'authentifier sans avoir à rentrer le mot de passe. Cela implique de créer ce fichier et de le remplir de la manière suivante avec ses IDs intranet :
 
 ```text
 machine clood.enercoop.org

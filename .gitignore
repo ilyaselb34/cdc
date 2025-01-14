@@ -5,3 +5,6 @@ env/
 
 # VS Code
 .flake8
+
+# Others
+TODO.txt
